@@ -1,0 +1,37 @@
+{
+  "name": "trollo-backend",
+  "version": "1.0.0",
+  "description": "Backend for the Trello clone - Trollo, a maturita project",
+  "main": "src/index.ts",
+  "repository": "https://github.com/sproott/trollo-backend",
+  "author": "sproott <david.hrabe12@seznam.cz>",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server-express": "^2.17.0",
+    "class-validator": "^0.12.2",
+    "dataloader": "^2.0.0",
+    "express": "^4.17.1",
+    "graphql": "^15.3.0",
+    "graphql-tools": "^6.2.2",
+    "knex": "^0.21.5",
+    "objection": "^2.2.3",
+    "pg": "^8.3.3",
+    "ramda": "^0.27.1",
+    "reflect-metadata": "^0.1.13",
+    "type-graphql": "^1.0.0"
+  },
+  "scripts": {
+    "start:dev": "set NODE_ENV=dev&& tsnd --transpile-only --deps --respawn ./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^14.10.2",
+    "@typescript-eslint/eslint-plugin": "^4.1.0",
+    "@typescript-eslint/parser": "^4.1.0",
+    "eslint": "^7.9.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.1.1",
+    "ts-node-dev": "^1.0.0-pre.62",
+    "typescript": "^4.0.2"
+  }
+}

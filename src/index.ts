@@ -1,17 +1,13 @@
 import "reflect-metadata"
-import { buildSchema } from "type-graphql"
-import { GraphQLSchema } from "graphql"
 import { Model } from "objection"
 import { knex } from "../db/knex"
 import express from "express"
 import session from "express-session"
 import { v4 as uuid } from "uuid"
 import passport from "passport"
-import { ApolloServer, ApolloServerExpressConfig } from "apollo-server-express"
-import { buildContext } from "graphql-passport"
-import User from "./user/user.model"
-import LoaderContainer from "./common/loader/loaderContainer"
-import initPassport from "./common/loginStrategy"
+import { ApolloServer } from "apollo-server-express"
+import initPassport from "./init/initPassport"
+import getApolloConfig from "./init/apolloConfig"
 
 let server, apolloServer
 
@@ -19,33 +15,12 @@ async function init() {
 	// init knex
 	Model.knex(knex)
 
-	// build GraphQL schema
-	const schema: GraphQLSchema = await buildSchema({
-		resolvers: [__dirname + "/**/*.resolver.ts"],
-	})
+	// init Apollo
+	const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.ts")
 
-	// configure Apollo
-	const configuration: ApolloServerExpressConfig = {
-		schema,
-		context: ({ req, res }) =>
-			buildContext({
-				req,
-				res,
-				User,
-				loaderContainer: new LoaderContainer(),
-			}),
-		playground: process.env.NODE_ENV !== "production" && {
-			settings: {
-				"request.credentials": "include",
-			},
-		},
-		introspection: process.env.NODE_ENV !== "production",
-		tracing: process.env.NODE_ENV !== "production",
-	}
+	apolloServer = new ApolloServer(apolloConfig)
 
-	apolloServer = new ApolloServer(configuration)
-
-	// initialize Passport
+	// init Passport
 	initPassport()
 
 	// create Express app

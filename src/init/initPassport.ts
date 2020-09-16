@@ -1,13 +1,14 @@
 import { GraphQLLocalStrategy } from "graphql-passport"
 import User from "../user/user.model"
-import { Crypt } from "./crypt"
+import { Crypt } from "../common/crypt"
 import { Container } from "typescript-ioc"
 import { UserService } from "../user/user.service"
 import passport from "passport"
 
-const userService = Container.get(UserService)
+export default function initPassport() {
+	const userService = Container.get(UserService)
 
-const initPassport = () => {
+	// make auth strategy
 	passport.use(
 		new GraphQLLocalStrategy(
 			async (username: string, password: string, done) => {
@@ -26,6 +27,7 @@ const initPassport = () => {
 		)
 	)
 
+	// add user (de)serialization
 	passport.serializeUser((user: User, done) => {
 		done(null, user.id)
 	})
@@ -35,5 +37,3 @@ const initPassport = () => {
 		done(null, user)
 	})
 }
-
-export default initPassport

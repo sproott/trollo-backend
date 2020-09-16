@@ -12,52 +12,52 @@ import getApolloConfig from "./init/apolloConfig"
 let server, apolloServer
 
 async function init() {
-	// init knex
-	Model.knex(knex)
+  // init knex
+  Model.knex(knex)
 
-	// init Apollo
-	const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.ts")
+  // init Apollo
+  const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.ts")
 
-	apolloServer = new ApolloServer(apolloConfig)
+  apolloServer = new ApolloServer(apolloConfig)
 
-	// init Passport
-	initPassport()
+  // init Passport
+  initPassport()
 
-	// create Express app
-	const app = express()
+  // create Express app
+  const app = express()
 
-	// add session capability to app
-	app.use(
-		session({
-			genid: (req) => uuid(),
-			secret: "bruhmoment01",
-			resave: false,
-			saveUninitialized: false,
-		})
-	)
+  // add session capability to app
+  app.use(
+    session({
+      genid: (req) => uuid(),
+      secret: "bruhmoment01",
+      resave: false,
+      saveUninitialized: false,
+    })
+  )
 
-	// add Passport to app
-	app.use(passport.initialize())
-	app.use(passport.session())
+  // add Passport to app
+  app.use(passport.initialize())
+  app.use(passport.session())
 
-	// connect Apollo with Express
-	apolloServer.applyMiddleware({ app })
+  // connect Apollo with Express
+  apolloServer.applyMiddleware({ app })
 
-	// start GraphQL server
-	return new Promise((resolve, rejects) => {
-		server = app.listen({ port: 4000 }, () => {
-			console.info(
-				`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`
-			)
-			resolve()
-		})
-	})
+  // start GraphQL server
+  return new Promise((resolve, rejects) => {
+    server = app.listen({ port: 4000 }, () => {
+      console.info(
+        `GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`
+      )
+      resolve()
+    })
+  })
 }
 
 const boot = init()
 
 boot.catch((err) => {
-	console.error("Server failed to start", err)
+  console.error("Server failed to start", err)
 })
 
 export { server, apolloServer, boot }

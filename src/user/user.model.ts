@@ -3,18 +3,18 @@ import { Model } from "objection"
 
 @ObjectType()
 export default class User extends Model {
-	static get tableName() {
-		return "user"
-	}
+  static get tableName() {
+    return "user"
+  }
 
-	@Field(() => ID)
-	id: string
+  @Field(() => ID)
+  id: string
 
-	@Field()
-	username: string
+  @Field()
+  username: string
 
-	@Field()
-	email: string
+  @Field()
+  email: string
 
-	password: string
+  password: string
 }

@@ -18,7 +18,6 @@ export default class UserResolver {
 
   @Query(() => User, { nullable: true })
   async currentUser(@Ctx() ctx: Context) {
-    console.log(ctx.getUser())
     return ctx.getUser()
   }
 
@@ -31,7 +30,6 @@ export default class UserResolver {
   async login(@Arg("input") input: LoginInput, @Ctx() ctx: Context) {
     const { user } = await ctx.authenticate("graphql-local", input)
     await ctx.login(user)
-    console.log(ctx.getUser())
     return user
   }
 
@@ -44,10 +42,10 @@ export default class UserResolver {
 
   @Mutation(() => User)
   async register(@Arg("input") input: RegisterInput, @Ctx() ctx: Context) {
-    const user: User = await User.query().insert({
+    const user: User = await this.userService.insertOne({
       ...input,
       password: await Crypt.hash(input.password),
-    })
+    } as User)
     await ctx.login(user)
     return user
   }

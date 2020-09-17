@@ -39,7 +39,7 @@ export default class UserResolver {
 
   @Mutation(() => Number, { nullable: true })
   async logout(@Ctx() ctx: Context) {
-    const id = ctx.getUser()?.id
+    const id = (await ctx.getUser())?.id
     ctx.logout()
     return id
   }

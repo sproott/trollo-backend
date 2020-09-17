@@ -2,6 +2,7 @@ import express from "express"
 import User from "../user/user.model"
 import passport, { AuthenticateOptions } from "passport"
 import LoaderContainer from "../common/loader/loaderContainer"
+import UserWrapper from "../user/userWrapper"
 
 export default function buildContext(
   req: express.Request,
@@ -10,7 +11,9 @@ export default function buildContext(
   return {
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),
-    getUser: () => req.user as User,
+    getUser: async () => {
+      return await (req.user as UserWrapper)?.getUser()
+    },
     authenticate: (strategyName: string, options: AuthenticateOptions) => {
       return new Promise<AuthenticateReturn>((resolve, reject) => {
         const done = (err?: Error, user?: User, info?: IVerifyOptions) => {

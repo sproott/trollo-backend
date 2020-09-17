@@ -3,6 +3,7 @@ import { Container } from "typescript-ioc"
 import { UserService } from "../user/user.service"
 import passport from "passport"
 import GraphqlCredentialsStrategy from "../auth/graphqlCredentialsStrategy"
+import UserWrapper from "../user/userWrapper"
 
 export default function initPassport() {
   const userService = Container.get(UserService)
@@ -15,8 +16,8 @@ export default function initPassport() {
     done(null, user.id)
   })
 
-  passport.deserializeUser(async (id: number, done) => {
-    const user: User = await userService.findById(id)
-    done(null, user)
+  passport.deserializeUser((id: number, done) => {
+    const userWrapper = new UserWrapper(id)
+    done(null, userWrapper)
   })
 }

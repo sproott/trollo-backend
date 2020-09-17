@@ -5,6 +5,7 @@ import { Crypt } from "../common/crypt"
 import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
 import Context from "../common/types/context"
+import PASSPORT_STRATEGY from "../common/types/enums/PASSPORT_STRATEGY"
 
 @Resolver(User)
 export default class UserResolver {
@@ -29,7 +30,7 @@ export default class UserResolver {
   @Mutation(() => User)
   async login(@Arg("input") input: LoginInput, @Ctx() ctx: Context) {
     const { user } = await ctx.authenticate(
-      "graphql-credentials-strategy",
+      PASSPORT_STRATEGY.CREDENTIALS_STRATEGY,
       input
     )
     await ctx.login(user)

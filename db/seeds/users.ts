@@ -1,5 +1,5 @@
 import * as Knex from "knex"
-import { Crypt } from "../../src/common/crypt"
+import { Crypt } from "../../src/common/util/crypt"
 
 export async function seed(knex: Knex): Promise<void> {
   await knex("user").del()

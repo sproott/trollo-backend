@@ -1,7 +1,7 @@
 import { Model } from "objection"
 import DataLoader from "dataloader"
 import { groupBy, map } from "ramda"
-import { Util } from "../util"
+import { Util } from "../util/util"
 
 export enum LoaderType {
   SINGLE,

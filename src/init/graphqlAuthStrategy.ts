@@ -8,6 +8,7 @@ import S from "string"
 import { Crypt } from "../common/crypt"
 import passport, { AuthenticateOptions } from "passport"
 import LoaderContainer from "../common/loader/loaderContainer"
+import PASSPORT_STRATEGY from "../common/types/enums/PASSPORT_STRATEGY"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject
@@ -17,7 +18,7 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
 
   constructor() {
     super()
-    this.name = "graphql-credentials-strategy"
+    this.name = PASSPORT_STRATEGY.CREDENTIALS_STRATEGY
   }
 
   async verify(req: express.Request, input: LoginInput, done: Done) {

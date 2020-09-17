@@ -9,10 +9,7 @@ export default interface Context {
   isUnauthenticated: () => boolean
   getUser: () => User
 
-  authenticate(
-    strategyName: string,
-    options: LoginInput
-  ): Promise<AuthenticateReturn>
+  authenticate(strategyName: string, options: LoginInput): Promise<AuthenticateReturn>
 
   login: (user: User, options?: AuthenticateOptions) => void
   logout: () => void

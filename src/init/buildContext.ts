@@ -4,10 +4,7 @@ import passport, { AuthenticateOptions } from "passport"
 import LoaderContainer from "../common/loader/loaderContainer"
 import UserWrapper from "../user/userWrapper"
 
-export default function buildContext(
-  req: express.Request,
-  res: express.Response
-) {
+export default function buildContext(req: express.Request, res: express.Response) {
   return {
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),

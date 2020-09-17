@@ -55,9 +55,7 @@ async function init() {
   // start GraphQL server
   return new Promise((resolve, rejects) => {
     server = app.listen({ port: 4000 }, () => {
-      console.info(
-        `GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`
-      )
+      console.info(`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`)
       resolve()
     })
   })
@@ -75,10 +73,7 @@ async function startServer(maxTries = 3) {
       running = true
       break
     } catch (err) {
-      console.error(
-        `Server failed to start, try ${tries}/${maxTries}, error: \n`,
-        err
-      )
+      console.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
     }
     if (tries < maxTries) {
       await Util.sleep(5000)

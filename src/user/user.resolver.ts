@@ -29,10 +29,7 @@ export default class UserResolver {
 
   @Mutation(() => User)
   async login(@Arg("input") input: LoginInput, @Ctx() ctx: Context) {
-    const { user } = await ctx.authenticate(
-      PassportStrategyType.CREDENTIALS_STRATEGY,
-      input
-    )
+    const { user } = await ctx.authenticate(PassportStrategyType.CREDENTIALS_STRATEGY, input)
     await ctx.login(user)
     return user
   }

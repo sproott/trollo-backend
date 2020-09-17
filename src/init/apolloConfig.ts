@@ -1,7 +1,7 @@
 import { GraphQLSchema } from "graphql"
 import { buildSchema } from "type-graphql"
 import { ApolloServerExpressConfig } from "apollo-server-express"
-import { buildContext, CommonRequest } from "../common/types/context"
+import { buildContext, CommonRequest } from "./graphqlAuthStrategy"
 
 export default async function getApolloConfig(dirname: string) {
   // build GraphQL schema

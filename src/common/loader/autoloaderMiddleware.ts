@@ -1,5 +1,5 @@
 import { MiddlewareFn } from "type-graphql"
-import GraphqlPassportContext from "../types/graphqlPassportContext"
+import GraphqlPassportContext from "../types/context"
 import { Model } from "objection"
 import Loader, { LoaderType } from "./loader"
 import { Util } from "../util"

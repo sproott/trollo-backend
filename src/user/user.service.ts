@@ -1,6 +1,5 @@
 import { Singleton } from "typescript-ioc"
 import User from "./user.model"
-import { Crypt } from "../common/crypt"
 
 @Singleton
 export class UserService {

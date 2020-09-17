@@ -1,7 +1,7 @@
 import { GraphQLSchema } from "graphql"
 import { buildSchema } from "type-graphql"
 import { ApolloServerExpressConfig } from "apollo-server-express"
-import { buildContext } from "../common/types/graphqlPassportContext"
+import { buildContext, CommonRequest } from "../common/types/context"
 
 export default async function getApolloConfig(dirname: string) {
   // build GraphQL schema
@@ -12,7 +12,7 @@ export default async function getApolloConfig(dirname: string) {
   // configure Apollo
   const configuration: ApolloServerExpressConfig = {
     schema,
-    context: ({ req, res }) => buildContext(req, res),
+    context: ({ req, res }) => buildContext(req as CommonRequest, res),
     playground: process.env.NODE_ENV !== "production" && {
       settings: {
         "request.credentials": "include",

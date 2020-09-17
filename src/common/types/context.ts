@@ -16,8 +16,7 @@ export default interface Context {
 
   authenticate(
     strategyName: string,
-    options: LoginInput,
-    done: Done
+    options: LoginInput
   ): Promise<AuthenticateReturn>
 
   login: (user: User, options?: AuthenticateOptions) => void

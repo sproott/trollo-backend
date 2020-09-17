@@ -2,7 +2,7 @@ import User from "../user/user.model"
 import { Container } from "typescript-ioc"
 import { UserService } from "../user/user.service"
 import passport from "passport"
-import { GraphqlCredentialsStrategy } from "../common/types/graphqlPassportContext"
+import { GraphqlCredentialsStrategy } from "../common/types/context"
 
 export default function initPassport() {
   const userService = Container.get(UserService)

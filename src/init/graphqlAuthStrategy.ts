@@ -8,7 +8,6 @@ import S from "string"
 import { Crypt } from "../common/crypt"
 import passport, { AuthenticateOptions } from "passport"
 import LoaderContainer from "../common/loader/loaderContainer"
-import Context from "../common/types/context"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject
@@ -56,11 +55,11 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
   }
 }
 
-export function buildContext(req: CommonRequest, res: express.Response) {
+export function buildContext(req: express.Request, res: express.Response) {
   return {
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),
-    getUser: () => req.user,
+    getUser: () => req.user as User,
     authenticate: (strategyName: string, options: AuthenticateOptions) => {
       return new Promise<AuthenticateReturn>((resolve, reject) => {
         const done = (err?: Error, user?: User, info?: IVerifyOptions) => {
@@ -88,12 +87,6 @@ export function buildContext(req: CommonRequest, res: express.Response) {
 }
 
 type Done = (err?: Error, user?: User, info?: IVerifyOptions) => void
-
-export interface CommonRequest
-  extends Pick<Context, "isAuthenticated" | "isUnauthenticated" | "logout">,
-    express.Request {
-  user?: User
-}
 
 export interface AuthenticateReturn {
   user?: User

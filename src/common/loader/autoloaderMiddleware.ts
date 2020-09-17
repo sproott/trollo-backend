@@ -1,5 +1,5 @@
 import { MiddlewareFn } from "type-graphql"
-import Context from "../types/context"
+import GraphqlPassportContext from "../types/graphqlPassportContext"
 import { Model } from "objection"
 import Loader, { LoaderType } from "./loader"
 import { Util } from "../util"
@@ -11,7 +11,7 @@ export const AutoLoader: MiddlewareFn = async ({
   info,
 }: {
   root: Model
-  context: Context
+  context: GraphqlPassportContext
   args: any
   info: any
 }) => {

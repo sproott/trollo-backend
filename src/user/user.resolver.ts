@@ -4,7 +4,7 @@ import { LoginInput, RegisterInput } from "./user.input"
 import { Crypt } from "../common/crypt"
 import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
-import Context from "../common/types/context"
+import GraphqlPassportContext from "../common/types/graphqlPassportContext"
 
 @Resolver(User)
 export default class UserResolver {
@@ -17,7 +17,7 @@ export default class UserResolver {
   }
 
   @Query(() => User, { nullable: true })
-  async currentUser(@Ctx() ctx: Context) {
+  async currentUser(@Ctx() ctx: GraphqlPassportContext) {
     return ctx.getUser()
   }
 
@@ -27,25 +27,36 @@ export default class UserResolver {
   }
 
   @Mutation(() => User)
-  async login(@Arg("input") input: LoginInput, @Ctx() ctx: Context) {
-    const { user } = await ctx.authenticate("graphql-local", input)
+  async login(
+    @Arg("input") input: LoginInput,
+    @Ctx() ctx: GraphqlPassportContext
+  ) {
+    const { user } = await ctx.authenticate(
+      "graphql-credentials-strategy",
+      input
+    )
+    // @ts-ignore
     await ctx.login(user)
     return user
   }
 
   @Mutation(() => Number, { nullable: true })
-  async logout(@Ctx() ctx: Context) {
+  async logout(@Ctx() ctx: GraphqlPassportContext) {
     const id = ctx.getUser()?.id
     ctx.logout()
     return id
   }
 
   @Mutation(() => User)
-  async register(@Arg("input") input: RegisterInput, @Ctx() ctx: Context) {
+  async register(
+    @Arg("input") input: RegisterInput,
+    @Ctx() ctx: GraphqlPassportContext
+  ) {
     const user: User = await this.userService.insertOne({
       ...input,
       password: await Crypt.hash(input.password),
     } as User)
+    // @ts-ignore
     await ctx.login(user)
     return user
   }

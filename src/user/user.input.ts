@@ -19,8 +19,8 @@ export class RegisterInput {
 @InputType()
 export class LoginInput {
   @Field()
-  @MaxLength(20)
-  username: string
+  @MaxLength(254)
+  usernameOrEmail: string
 
   @Field()
   @Length(8, 32)

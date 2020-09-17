@@ -9,11 +9,18 @@ import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
 
+const KnexSessionStore = require("connect-session-knex")(session)
+
 let server, apolloServer
 
 async function init() {
   // init knex
   Model.knex(knex)
+
+  const store = new KnexSessionStore({
+    knex,
+    tablename: "sessions",
+  })
 
   // init Apollo
   const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.ts")
@@ -33,6 +40,7 @@ async function init() {
       secret: "bruhmoment01",
       resave: false,
       saveUninitialized: false,
+      store,
     })
   )
 

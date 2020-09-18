@@ -1,7 +1,7 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql"
 import User from "./user.model"
 import { LoginInput, RegisterInput } from "./user.input"
-import { Crypt } from "../common/util/crypt"
+import { Crypt } from "../common/lib/crypt"
 import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
 import Context from "../common/types/context"

@@ -8,7 +8,7 @@ import passport from "passport"
 import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
-import { Util } from "./common/util/util"
+import { Util } from "./common/lib/util"
 
 const KnexSessionStore = require("connect-session-knex")(session)
 

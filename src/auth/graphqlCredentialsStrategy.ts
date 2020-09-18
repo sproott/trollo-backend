@@ -6,7 +6,7 @@ import express from "express"
 import { LoginInput } from "../user/user.input"
 import User from "../user/user.model"
 import S from "string"
-import { Crypt } from "../common/util/crypt"
+import { Crypt } from "../common/lib/crypt"
 import { Done } from "../init/buildContext"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {

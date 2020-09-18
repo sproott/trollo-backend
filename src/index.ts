@@ -8,11 +8,11 @@ import passport from "passport"
 import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
-import { Util } from "./common/lib/util"
+import { util } from "./common/lib/util"
 
 const KnexSessionStore = require("connect-session-knex")(session)
 
-let server, apolloServer
+let server: any, apolloServer: any
 
 async function init() {
   // init knex
@@ -76,7 +76,7 @@ async function startServer(maxTries = 3) {
       console.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
     }
     if (tries < maxTries) {
-      await Util.sleep(5000)
+      await util.sleep(5000)
     }
   }
 

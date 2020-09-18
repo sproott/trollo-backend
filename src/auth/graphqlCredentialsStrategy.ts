@@ -6,8 +6,8 @@ import express from "express"
 import { LoginInput } from "../user/user.input"
 import User from "../user/user.model"
 import S from "string"
-import { Crypt } from "../common/lib/crypt"
 import { Done } from "../init/buildContext"
+import { crypt } from "../common/lib/crypt"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject
@@ -31,7 +31,7 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
     if (!user) {
       done(new Error("User doesn't exist"), null)
     }
-    return Crypt.compare(password, user.password).then((success) => {
+    return crypt.compare(password, user.password).then((success: boolean) => {
       if (success) {
         done(null, user)
       } else {

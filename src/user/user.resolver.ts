@@ -1,11 +1,11 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql"
 import User from "./user.model"
 import { LoginInput, RegisterInput } from "./user.input"
-import { Crypt } from "../common/lib/crypt"
 import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
 import Context from "../common/types/context"
 import PassportStrategyType from "../auth/enum/PassportStrategyType"
+import { crypt } from "../common/lib/crypt"
 
 @Resolver(User)
 export default class UserResolver {
@@ -45,7 +45,7 @@ export default class UserResolver {
   async register(@Arg("input") input: RegisterInput, @Ctx() ctx: Context) {
     const user: User = await this.userService.insertOne({
       ...input,
-      password: await Crypt.hash(input.password),
+      password: await crypt.hash(input.password),
     } as User)
     await ctx.login(user)
     return user

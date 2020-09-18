@@ -11,7 +11,8 @@
     "outDir": "build",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strict": false
+    "strict": false,
+    "noImplicitAny": true
   },
   "exclude": [
     "node_modules"

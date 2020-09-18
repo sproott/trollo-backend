@@ -1,13 +1,11 @@
 import bcrypt from "bcrypt"
 
-export class Crypt {
-  private Crypt() {}
-
-  static hash(str: string, saltRounds = 10) {
+export namespace crypt {
+  export function hash(str: string, saltRounds = 10) {
     return bcrypt.hash(str, saltRounds)
   }
 
-  static compare(str, hash) {
+  export function compare(str: string, hash: string) {
     return bcrypt.compare(str, hash)
   }
 }

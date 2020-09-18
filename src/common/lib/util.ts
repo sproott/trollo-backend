@@ -1,13 +1,11 @@
 import { last } from "ramda"
 
-export class Util {
-  private Util() {}
-
-  static getColumnName(column: string): string {
+export namespace util {
+  export function getColumnName(column: string): string {
     return last(column.split("."))
   }
 
-  static sleep(ms) {
+  export function sleep(ms: number) {
     return new Promise((resolve) => {
       setTimeout(resolve, ms)
     })

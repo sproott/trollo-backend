@@ -6,6 +6,7 @@ import { UserService } from "./user.service"
 import Context from "../common/types/context"
 import PassportStrategyType from "../auth/enum/PassportStrategyType"
 import { crypt } from "../common/lib/crypt"
+import { RegisterError } from "./types/registerError"
 
 @Resolver(User)
 export default class UserResolver {
@@ -43,6 +44,23 @@ export default class UserResolver {
 
   @Mutation(() => User)
   async register(@Arg("input") input: RegisterInput, @Ctx() ctx: Context) {
+    let error: RegisterError = new RegisterError("User already exists")
+    let throwError = false
+    const foundEmail = !!(await this.userService.findByEmail(input.email))
+    if (foundEmail) {
+      error.email = "Email belongs to an already registered user"
+      throwError = true
+    }
+    const foundUsername = !!(await this.userService.findByUsername(input.username))
+    if (foundUsername) {
+      error.username = "Username already exists"
+      throwError = true
+    }
+
+    if (throwError) {
+      throw error
+    }
+
     const user: User = await this.userService.insertOne({
       ...input,
       password: await crypt.hash(input.password),

@@ -8,6 +8,7 @@ import User from "../user/user.model"
 import S from "string"
 import { Done } from "../init/buildContext"
 import { crypt } from "../common/lib/crypt"
+import { util } from "../common/lib/util"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject
@@ -20,7 +21,7 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
     this.name = PassportStrategyType.CREDENTIALS_STRATEGY
   }
 
-  async verify(req: express.Request, input: LoginInput, done: Done) {
+  async verify(req: express.Request, input: LoginInput, done: Done): Promise<void> {
     let { usernameOrEmail, password } = input
     let user: User
     if (S(usernameOrEmail).contains("@")) {
@@ -30,14 +31,14 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
     }
     if (!user) {
       done(new Error("User doesn't exist"), null)
+      return
     }
-    return crypt.compare(password, user.password).then((success: boolean) => {
-      if (success) {
-        done(null, user)
-      } else {
-        done(new Error("Incorrect password"), null)
-      }
-    })
+    const success = await crypt.compare(password, user.password)
+    if (success) {
+      done(null, user)
+    } else {
+      done(new Error("Incorrect password"), null)
+    }
   }
 
   authenticate(req: express.Request, options?: any): any {

@@ -42,6 +42,11 @@ async function init() {
       resave: false,
       saveUninitialized: false,
       store,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
+      },
     })
   )
 
@@ -50,7 +55,13 @@ async function init() {
   app.use(passport.session())
 
   // connect Apollo with Express
-  apolloServer.applyMiddleware({ app })
+  apolloServer.applyMiddleware({
+    app,
+    cors: {
+      credentials: true,
+      origin: "http://localhost:3000",
+    },
+  })
 
   // start GraphQL server
   return new Promise((resolve, rejects) => {

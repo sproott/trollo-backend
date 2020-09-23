@@ -8,7 +8,6 @@ import User from "../user/user.model"
 import S from "string"
 import { Done } from "../init/buildContext"
 import { crypt } from "../common/lib/crypt"
-import { util } from "../common/lib/util"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject

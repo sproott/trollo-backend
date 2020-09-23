@@ -1,5 +1,5 @@
 import { Field, InputType } from "type-graphql"
-import { Length, MaxLength } from "class-validator"
+import { Contains, Length, MaxLength } from "class-validator"
 
 @InputType()
 export class RegisterInput {
@@ -9,6 +9,7 @@ export class RegisterInput {
 
   @Field()
   @MaxLength(254)
+  @Contains("@")
   email: string
 
   @Field()

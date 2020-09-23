@@ -6,7 +6,7 @@ import { UserService } from "./user.service"
 import Context from "../common/types/context"
 import PassportStrategyType from "../auth/enum/PassportStrategyType"
 import { crypt } from "../common/lib/crypt"
-import { RegisterError } from "./types/registerError"
+import { RegisterError, RegisterResponse } from "./types/registerError"
 
 @Resolver(User)
 export default class UserResolver {
@@ -28,6 +28,16 @@ export default class UserResolver {
     return User.query().select()
   }
 
+  @Query(() => Boolean)
+  async usernameExists(@Arg("username") username: string) {
+    !!(await this.userService.findByUsername(username))
+  }
+
+  @Query(() => Boolean)
+  async emailExists(@Arg("email") email: string) {
+    !!(await this.userService.findByEmail(email))
+  }
+
   @Mutation(() => User)
   async login(@Arg("input") input: LoginInput, @Ctx() ctx: Context) {
     const { user } = await ctx.authenticate(PassportStrategyType.CREDENTIALS_STRATEGY, input)
@@ -42,23 +52,25 @@ export default class UserResolver {
     return id
   }
 
-  @Mutation(() => User)
+  @Mutation(() => RegisterResponse)
   async register(@Arg("input") input: RegisterInput, @Ctx() ctx: Context) {
-    let error: RegisterError = new RegisterError("User already exists")
+    const error: RegisterError = new RegisterError()
+    const response = new RegisterResponse()
     let throwError = false
     const foundEmail = !!(await this.userService.findByEmail(input.email))
     if (foundEmail) {
-      error.email = "Email belongs to an already registered user"
+      error.email = true
       throwError = true
     }
     const foundUsername = !!(await this.userService.findByUsername(input.username))
     if (foundUsername) {
-      error.username = "Username already exists"
+      error.username = true
       throwError = true
     }
 
     if (throwError) {
-      throw error
+      response.error = error
+      return response
     }
 
     const user: User = await this.userService.insertOne({
@@ -66,6 +78,7 @@ export default class UserResolver {
       password: await crypt.hash(input.password),
     } as User)
     await ctx.login(user)
-    return user
+    response.user = user
+    return response
   }
 }

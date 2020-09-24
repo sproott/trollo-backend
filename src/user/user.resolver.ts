@@ -28,16 +28,6 @@ export default class UserResolver {
     return User.query().select()
   }
 
-  @Query(() => Boolean)
-  async usernameExists(@Arg("username") username: string) {
-    !!(await this.userService.findByUsername(username))
-  }
-
-  @Query(() => Boolean)
-  async emailExists(@Arg("email") email: string) {
-    !!(await this.userService.findByEmail(email))
-  }
-
   @Mutation(() => User)
   async login(@Arg("input") input: LoginInput, @Ctx() ctx: Context) {
     const { user } = await ctx.authenticate(PassportStrategyType.CREDENTIALS_STRATEGY, input)

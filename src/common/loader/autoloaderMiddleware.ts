@@ -1,8 +1,20 @@
 import { MiddlewareFn } from "type-graphql"
-import GraphqlPassportContext from "../types/context"
+import Context from "../types/context"
 import { Model } from "objection"
 import Loader, { LoaderType } from "./loader"
-import { Util } from "../lib/util"
+import { getColumnName } from "../lib/util"
+
+const mappings = {
+  [Model.HasManyRelation.name]: {
+    type: LoaderType.HasMany,
+  },
+  [Model.BelongsToOneRelation.name]: {
+    type: LoaderType.BelongsToOne,
+  },
+  [Model.ManyToManyRelation.name]: {
+    type: LoaderType.ManyToMany,
+  },
+}
 
 export const AutoLoader: MiddlewareFn = async ({
   root,
@@ -11,33 +23,27 @@ export const AutoLoader: MiddlewareFn = async ({
   info,
 }: {
   root: Model
-  context: GraphqlPassportContext
+  context: Context
   args: any
   info: any
 }) => {
-  const rootClass = <typeof Model>Object.getPrototypeOf(root).constructor
-  const field = rootClass.relationMappings[info.fieldName]
-  const idColumn = rootClass.idColumn
-  const mappings = {
-    [Model.HasManyRelation.name]: {
-      type: LoaderType.MULTI,
-    },
-    [Model.BelongsToOneRelation.name]: {
-      type: LoaderType.SINGLE,
-    },
-  }
+  const model = <typeof Model>Object.getPrototypeOf(root).constructor
+  // @ts-ignore
+  const field = model.relationMappings[info.fieldName]
+  const idColumn = model.idColumn
   let loader: Loader
   if (field.relation.name in mappings) {
     loader = context.loaderContainer.getLoader({
       ...mappings[field.relation.name],
-      column: field.join.to,
-      model: field.modelClass,
+      fieldName: info.fieldName,
+      model,
     })
   } else {
     throw new Error("Unsupported: AutoLoad given an unknown relation.")
   }
   if (typeof idColumn == "string") {
-    return loader.load(root[Util.getColumnName(field.join.from)])
+    // @ts-ignore
+    return loader.load(root[getColumnName(field.join.from)])
   } else {
     throw new Error("Unsupported: Loader.load given array of keys.")
   }

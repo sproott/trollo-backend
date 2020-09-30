@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 
-export const hash = (str: string, saltRounds = 10) => {
+export const hash = (str: string, saltRounds = 12) => {
   return bcrypt.hash(str, saltRounds)
 }
 

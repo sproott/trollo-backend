@@ -7,6 +7,7 @@ import Context from "../common/types/context"
 import PassportStrategyType from "../auth/enum/PassportStrategyType"
 import { RegisterError, RegisterResponse } from "./types/registerError"
 import Role from "../auth/types/role"
+import { hash } from "../common/lib/crypt"
 
 @Resolver(User)
 export default class UserResolver {
@@ -67,6 +68,7 @@ export default class UserResolver {
 
     const user: User = await this.userService.insertOne({
       ...input,
+      password: await hash(input.password),
     } as User)
     await ctx.login(user)
     response.user = user

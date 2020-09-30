@@ -1,10 +1,9 @@
 import { Authorized, Field, ID, ObjectType } from "type-graphql"
 import { Model } from "objection"
-import withHashedPassword from "../common/lib/withHashedPassword"
 import Role from "../auth/types/role"
 
 @ObjectType()
-export default class User extends withHashedPassword(Model) {
+export default class User extends Model {
   static get tableName() {
     return "user"
   }

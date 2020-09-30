@@ -7,7 +7,6 @@ import Context from "../common/types/context"
 import PassportStrategyType from "../auth/enum/PassportStrategyType"
 import { RegisterError, RegisterResponse } from "./types/registerError"
 import Role from "../auth/types/role"
-import UserWrapper from "./userWrapper"
 
 @Resolver(User)
 export default class UserResolver {
@@ -39,11 +38,10 @@ export default class UserResolver {
   }
 
   @Authorized()
-  @Mutation(() => String, { nullable: true })
+  @Mutation(() => Boolean, { nullable: true })
   async logout(@Ctx() ctx: Context) {
-    const id = (await ctx.getUser())?.id
     ctx.logout()
-    return id
+    return true
   }
 
   @Mutation(() => RegisterResponse)

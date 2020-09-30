@@ -1,12 +1,15 @@
-import { Field, ID, ObjectType } from "type-graphql"
+import { Authorized, Field, ID, ObjectType } from "type-graphql"
 import { Model } from "objection"
+import withHashedPassword from "../common/lib/withHashedPassword"
+import Role from "../auth/types/role"
 
 @ObjectType()
-export default class User extends Model {
+export default class User extends withHashedPassword(Model) {
   static get tableName() {
     return "user"
   }
 
+  @Authorized(Role.APP_ADMIN)
   @Field(() => ID)
   id: string
 
@@ -17,4 +20,7 @@ export default class User extends Model {
   email: string
 
   password: string
+
+  @Field()
+  isAdmin: boolean
 }

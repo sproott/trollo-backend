@@ -2,10 +2,12 @@ import { GraphQLSchema } from "graphql"
 import { buildSchema } from "type-graphql"
 import { ApolloServerExpressConfig } from "apollo-server-express"
 import buildContext from "./buildContext"
+import customAuthChecker from "../auth/authChecker"
 
 export default async function getApolloConfig(dirname: string) {
   // build GraphQL schema
   const schema: GraphQLSchema = await buildSchema({
+    authChecker: customAuthChecker,
     resolvers: [dirname],
   })
 

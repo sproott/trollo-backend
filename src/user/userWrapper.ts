@@ -6,15 +6,15 @@ export default class UserWrapper {
   @Inject
   userService: UserService
 
-  id: number
+  id: string
 
   user: User
 
-  constructor(id: number) {
+  constructor(id: string) {
     this.id = id
   }
 
-  async getUser() {
+  getUser = async () => {
     if (!this.user) {
       this.user = await this.userService.findById(this.id)
     }

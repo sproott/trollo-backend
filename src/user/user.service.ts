@@ -3,16 +3,16 @@ import User from "./user.model"
 
 @Singleton
 export class UserService {
-  findById(id: number): Promise<User> {
+  findById(id: string): Promise<User> {
     return User.query().findById(id)
   }
 
   findByUsername(username: string, caseInsensitive = true) {
-    return this.findBy(Column.USERNAME, username, caseInsensitive).then((users) => users[0])
+    return this.findBy(Column.USERNAME, username, caseInsensitive)
   }
 
   findByEmail(email: string, caseInsensitive = true) {
-    return this.findBy(Column.EMAIL, email, caseInsensitive).then((users) => users[0])
+    return this.findBy(Column.EMAIL, email, caseInsensitive)
   }
 
   insertOne(user: User) {
@@ -23,13 +23,13 @@ export class UserService {
     return User.query().insert(users)
   }
 
-  private findBy(column: Column, value: string, caseInsensitive = true): Promise<User[]> {
+  private findBy(column: Column, value: string, caseInsensitive = true) {
     return caseInsensitive
       ? this.findByCaseInsensitive(column, value)
       : User.query().where(column, "=", value)
   }
 
-  private findByCaseInsensitive(column: Column, value: string): Promise<User[]> {
+  private findByCaseInsensitive(column: Column, value: string) {
     return User.query().whereRaw("LOWER(" + column + ") = ?", value.toLowerCase())
   }
 }

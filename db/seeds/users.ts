@@ -1,5 +1,5 @@
 import * as Knex from "knex"
-import { Crypt } from "../../src/common/lib/crypt"
+import { hash } from "../../src/common/lib/crypt"
 
 export async function seed(knex: Knex): Promise<void> {
   await knex("user").del()
@@ -7,17 +7,17 @@ export async function seed(knex: Knex): Promise<void> {
     {
       username: "bob",
       email: "bob33@gmail.com",
-      password: await Crypt.hash("bruhbruhbob"),
+      password: await hash("bruhbruhbob"),
     },
     {
       username: "john",
       email: "john03@gmail.com",
-      password: await Crypt.hash("bruhbruhjohn"),
+      password: await hash("bruhbruhjohn"),
     },
     {
       username: "alex",
       email: "alex12@gmail.com",
-      password: await Crypt.hash("bruhbruhalex"),
+      password: await hash("bruhbruhalex"),
     },
   ])
 }

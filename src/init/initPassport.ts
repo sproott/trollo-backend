@@ -16,7 +16,7 @@ export default function initPassport() {
     done(null, user.id)
   })
 
-  passport.deserializeUser((id: number, done) => {
+  passport.deserializeUser((id: string, done) => {
     const userWrapper = new UserWrapper(id)
     done(null, userWrapper)
   })

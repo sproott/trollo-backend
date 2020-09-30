@@ -1,20 +1,22 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql"
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql"
 import User from "./user.model"
 import { LoginInput, RegisterInput } from "./user.input"
 import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
 import Context from "../common/types/context"
 import PassportStrategyType from "../auth/enum/PassportStrategyType"
-import { crypt } from "../common/lib/crypt"
 import { RegisterError, RegisterResponse } from "./types/registerError"
+import Role from "../auth/types/role"
+import UserWrapper from "./userWrapper"
 
 @Resolver(User)
 export default class UserResolver {
   @Inject
   userService: UserService
 
+  @Authorized(Role.APP_ADMIN)
   @Query(() => User)
-  async user(@Arg("id") id: number) {
+  async user(@Arg("id") id: string) {
     return this.userService.findById(id)
   }
 
@@ -23,6 +25,7 @@ export default class UserResolver {
     return ctx.getUser()
   }
 
+  @Authorized(Role.APP_ADMIN)
   @Query(() => [User])
   async users() {
     return User.query().select()
@@ -35,7 +38,8 @@ export default class UserResolver {
     return user
   }
 
-  @Mutation(() => Number, { nullable: true })
+  @Authorized()
+  @Mutation(() => String, { nullable: true })
   async logout(@Ctx() ctx: Context) {
     const id = (await ctx.getUser())?.id
     ctx.logout()
@@ -47,12 +51,12 @@ export default class UserResolver {
     const error: RegisterError = new RegisterError()
     const response = new RegisterResponse()
     let throwError = false
-    const foundEmail = !!(await this.userService.findByEmail(input.email))
+    const foundEmail = !!(await this.userService.findByEmail(input.email))[0]
     if (foundEmail) {
       error.email = true
       throwError = true
     }
-    const foundUsername = !!(await this.userService.findByUsername(input.username))
+    const foundUsername = !!(await this.userService.findByUsername(input.username))[0]
     if (foundUsername) {
       error.username = true
       throwError = true
@@ -65,10 +69,19 @@ export default class UserResolver {
 
     const user: User = await this.userService.insertOne({
       ...input,
-      password: await crypt.hash(input.password),
     } as User)
     await ctx.login(user)
     response.user = user
     return response
+  }
+
+  @Authorized(Role.APP_ADMIN)
+  @Mutation(() => Boolean)
+  async makeAdmin(@Arg("username") username: string) {
+    const numUpdated = await this.userService.findByUsername(username).patch({
+      isAdmin: true,
+    })
+
+    return !!numUpdated
   }
 }

@@ -27,7 +27,7 @@ export default function buildContext(req: express.Request, res: express.Response
           if (err) reject(err)
           else resolve()
         }
-        req.login(user, options, done)
+        req.login(new UserWrapper(user.id), options, done)
       })
     },
     logout: () => req.logout(),

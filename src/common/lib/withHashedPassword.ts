@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid"
 import { Model, QueryContext } from "objection"
 import { hash } from "./crypt"
 

@@ -8,7 +8,8 @@ import passport from "passport"
 import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
-import { util } from "./common/lib/util"
+import ON_DEATH from "death"
+import { sleep } from "./common/lib/util"
 
 const KnexSessionStore = require("connect-session-knex")(session)
 
@@ -87,7 +88,7 @@ async function startServer(maxTries = 3) {
       console.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
     }
     if (tries < maxTries) {
-      await util.sleep(5000)
+      await sleep(5000)
     }
   }
 
@@ -101,10 +102,26 @@ async function startServer(maxTries = 3) {
 
 const boot = startServer(3)
 
-process.on("SIGTERM", () => {
-  server.close(() => {
-    console.log("SIGTERM received, terminating")
-  })
+const gracefullyShutDown = (signal: string) => {
+  console.info(
+    `\nReceived ${signal} signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
+  )
+
+  return apolloServer
+    .stop()
+    .then(() => {
+      console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
+      process.exit()
+    })
+    .catch((error: any) => {
+      console.error(
+        `Shutdown error! \nMore info: ${error} \nFinished at: ${new Date().toISOString()}`
+      )
+    })
+}
+
+ON_DEATH((signal) => {
+  return gracefullyShutDown(signal)
 })
 
 export { server, apolloServer, boot }

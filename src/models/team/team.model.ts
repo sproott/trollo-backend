@@ -1,11 +1,11 @@
 import { Authorized, Field, ID, ObjectType } from "type-graphql"
 import { Model } from "objection"
-import Role from "../auth/types/role"
+import Role from "../../auth/types/role"
 
 @ObjectType()
-export default class User extends Model {
+export default class Team extends Model {
   static get tableName() {
-    return "user"
+    return "team"
   }
 
   @Authorized(Role.APP_ADMIN)
@@ -13,13 +13,5 @@ export default class User extends Model {
   id: string
 
   @Field()
-  username: string
-
-  @Field()
-  email: string
-
-  password: string
-
-  @Field()
-  isAdmin: boolean
+  name: string
 }

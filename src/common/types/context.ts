@@ -1,6 +1,6 @@
 import LoaderContainer from "../loader/loaderContainer"
-import User from "../../user/user.model"
-import { LoginInput } from "../../user/user.input"
+import User from "../../models/user/user.model"
+import { LoginInput } from "../../models/user/user.input"
 import { AuthenticateOptions } from "passport"
 import { AuthenticateReturn } from "../../init/buildContext"
 

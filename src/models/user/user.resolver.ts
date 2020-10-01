@@ -3,11 +3,11 @@ import User from "./user.model"
 import { LoginInput, RegisterInput } from "./user.input"
 import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
-import Context from "../common/types/context"
-import PassportStrategyType from "../auth/enum/PassportStrategyType"
+import Context from "../../common/types/context"
+import PassportStrategyType from "../../auth/enum/PassportStrategyType"
 import { RegisterError, RegisterResponse } from "./types/registerError"
-import Role from "../auth/types/role"
-import { hash } from "../common/lib/crypt"
+import Role from "../../auth/types/role"
+import { hash } from "../../common/lib/crypt"
 
 @Resolver(User)
 export default class UserResolver {

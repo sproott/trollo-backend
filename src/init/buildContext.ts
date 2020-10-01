@@ -1,8 +1,8 @@
 import express from "express"
-import User from "../user/user.model"
+import User from "../models/user/user.model"
 import passport, { AuthenticateOptions } from "passport"
 import LoaderContainer from "../common/loader/loaderContainer"
-import UserWrapper from "../user/userWrapper"
+import UserWrapper from "../models/user/userWrapper"
 
 export default function buildContext(req: express.Request, res: express.Response) {
   return {

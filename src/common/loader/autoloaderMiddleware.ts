@@ -30,6 +30,11 @@ export const AutoLoader: MiddlewareFn = async ({
   const model = <typeof Model>Object.getPrototypeOf(root).constructor
   // @ts-ignore
   const field = model.relationMappings[info.fieldName]
+  if (!field) {
+    throw new Error(
+      `Error: Relation "${info.fieldName}" missing in relation mappings of class "${root.constructor.name}"`
+    )
+  }
   const idColumn = model.idColumn
   let loader: Loader
   if (field.relation.name in mappings) {

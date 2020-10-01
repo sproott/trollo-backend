@@ -24,6 +24,10 @@ export default class User extends Model {
 
   @UseMiddleware(AutoLoader)
   @Field(() => [Team])
+  ownTeams: Team[]
+
+  @UseMiddleware(AutoLoader)
+  @Field(() => [Team])
   teams: Team[]
 
   @Field()
@@ -31,6 +35,14 @@ export default class User extends Model {
 
   static get relationMappings() {
     return {
+      ownTeams: {
+        relation: Model.HasManyRelation,
+        modelClass: Team,
+        join: {
+          from: "user.id",
+          to: "team.admin_id",
+        },
+      },
       teams: {
         relation: Model.ManyToManyRelation,
         modelClass: Team,

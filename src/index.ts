@@ -103,9 +103,9 @@ async function startServer(maxTries = 3) {
 
 const boot = startServer(3)
 
-const gracefullyShutDown = async () => {
+const gracefullyShutDown = (signal: string) => {
   console.info(
-    `\nReceived exit signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
+    `\nReceived ${signal} signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
   )
 
   return apolloServer
@@ -120,6 +120,8 @@ const gracefullyShutDown = async () => {
     })
 }
 
-ON_DEATH(() => gracefullyShutDown())
+ON_DEATH((signal) => {
+  return gracefullyShutDown(signal)
+})
 
 export { server, apolloServer, boot }

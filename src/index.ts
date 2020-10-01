@@ -10,12 +10,9 @@ import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
 import { sleep } from "./common/lib/util"
 import { Container } from "typescript-ioc"
-import AppLogger from "./common/lib/logger"
 import ON_DEATH from "death"
 
 const KnexSessionStore = require("connect-session-knex")(session)
-
-const logger = Container.get(AppLogger)
 
 let server: any, apolloServer: any
 
@@ -71,7 +68,7 @@ async function init() {
   // start GraphQL server
   return new Promise((resolve, rejects) => {
     server = app.listen({ port: 4000 }, () => {
-      logger.info(`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`)
+      console.info(`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`)
       resolve()
     })
   })
@@ -89,7 +86,7 @@ async function startServer(maxTries = 3) {
       running = true
       break
     } catch (err) {
-      logger.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
+      console.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
     }
     if (tries < maxTries) {
       await sleep(5000)
@@ -99,7 +96,7 @@ async function startServer(maxTries = 3) {
   if (running) {
     return boot
   } else {
-    logger.error("Server failed to start, quitting")
+    console.error("Server failed to start, quitting")
     process.kill(process.pid, "SIGTERM")
   }
 }
@@ -107,22 +104,19 @@ async function startServer(maxTries = 3) {
 const boot = startServer(3)
 
 const gracefullyShutDown = async () => {
-  logger.info(
+  console.info(
     `\nReceived exit signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
   )
 
   return apolloServer
     .stop()
     .then(() => {
-      logger.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
+      console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
     })
     .catch((error: any) => {
-      logger.error(
+      console.error(
         `Shutdown error! \nMore info: ${error} \nFinished at: ${new Date().toISOString()}`
       )
-    })
-    .then((resolve?: () => void) => {
-      logger.logger.on("finish", () => resolve())
     })
 }
 

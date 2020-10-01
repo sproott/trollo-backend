@@ -1,4 +1,4 @@
-module.exports = {
+const knexSettings = {
   development: {
     client: "postgresql",
     connection: {
@@ -16,3 +16,5 @@ module.exports = {
     debug: false,
   },
 }
+
+export default knexSettings

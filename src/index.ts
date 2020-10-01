@@ -8,10 +8,14 @@ import passport from "passport"
 import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
-import ON_DEATH from "death"
 import { sleep } from "./common/lib/util"
+import { Container } from "typescript-ioc"
+import AppLogger from "./common/lib/logger"
+import ON_DEATH from "death"
 
 const KnexSessionStore = require("connect-session-knex")(session)
+
+const logger = Container.get(AppLogger)
 
 let server: any, apolloServer: any
 
@@ -25,7 +29,7 @@ async function init() {
   })
 
   // init Apollo
-  const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.ts")
+  const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.*")
 
   apolloServer = new ApolloServer(apolloConfig)
 
@@ -67,7 +71,7 @@ async function init() {
   // start GraphQL server
   return new Promise((resolve, rejects) => {
     server = app.listen({ port: 4000 }, () => {
-      console.info(`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`)
+      logger.info(`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`)
       resolve()
     })
   })
@@ -85,7 +89,7 @@ async function startServer(maxTries = 3) {
       running = true
       break
     } catch (err) {
-      console.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
+      logger.error(`Server failed to start, try ${tries}/${maxTries}, error: \n`, err)
     }
     if (tries < maxTries) {
       await sleep(5000)
@@ -95,33 +99,33 @@ async function startServer(maxTries = 3) {
   if (running) {
     return boot
   } else {
-    console.error("Server failed to start, quitting")
+    logger.error("Server failed to start, quitting")
     process.kill(process.pid, "SIGTERM")
   }
 }
 
 const boot = startServer(3)
 
-const gracefullyShutDown = (signal: string) => {
-  console.info(
-    `\nReceived ${signal} signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
+const gracefullyShutDown = async () => {
+  logger.info(
+    `\nReceived exit signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
   )
 
   return apolloServer
     .stop()
     .then(() => {
-      console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
-      process.exit()
+      logger.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
     })
     .catch((error: any) => {
-      console.error(
+      logger.error(
         `Shutdown error! \nMore info: ${error} \nFinished at: ${new Date().toISOString()}`
       )
     })
+    .then((resolve?: () => void) => {
+      logger.logger.on("finish", () => resolve())
+    })
 }
 
-ON_DEATH((signal) => {
-  return gracefullyShutDown(signal)
-})
+ON_DEATH(() => gracefullyShutDown())
 
 export { server, apolloServer, boot }

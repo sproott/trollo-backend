@@ -12,6 +12,6 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.raw('drop extension if exists "uuid-ossp"')
-  return knex.schema.dropTable("user")
+  await knex.schema.dropTable("user")
+  return knex.raw('drop extension if exists "uuid-ossp"')
 }

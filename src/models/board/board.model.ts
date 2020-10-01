@@ -3,12 +3,12 @@ import { Model } from "objection"
 import Role from "../../auth/types/role"
 import User from "../user/user.model"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
-import Board from "../board/board.model"
+import List from "../list/list.model"
 
 @ObjectType()
-export default class Team extends Model {
+export default class Board extends Model {
   static get tableName() {
-    return "team"
+    return "board"
   }
 
   @Authorized(Role.APP_ADMIN)
@@ -19,30 +19,17 @@ export default class Team extends Model {
   name: string
 
   @UseMiddleware(AutoLoader)
-  @Field(() => User)
-  admin: User
-  admin_id: string
-
-  @UseMiddleware(AutoLoader)
-  @Field(() => [Board], { nullable: true })
-  boards?: Board[]
+  @Field(() => [List], { nullable: true })
+  lists?: List[]
 
   static get relationMappings() {
     return {
-      admin: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: "team.admin_id",
-          to: "user.id",
-        },
-      },
-      boards: {
+      lists: {
         relation: Model.HasManyRelation,
-        modelClass: Board,
+        modelClass: List,
         join: {
-          from: "team.id",
-          to: "board.team_id",
+          from: "board.id",
+          to: "list.board_id",
         },
       },
     }

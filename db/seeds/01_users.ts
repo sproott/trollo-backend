@@ -3,6 +3,7 @@ import { hash } from "../../src/common/lib/crypt"
 
 export async function seed(knex: Knex): Promise<void> {
   await knex("users_teams").del()
+  await knex("team").del()
 
   await knex("user").del()
   await knex("user").insert([

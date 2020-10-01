@@ -3,9 +3,6 @@ import { uuid } from "../lib"
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema
-    .alterTable("user", (table) => {
-      table.unique(["id"])
-    })
     .createTable("team", (table) => {
       uuid(table, knex)
       table.string("name")
@@ -17,5 +14,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return knex.schema.dropTable("team").dropTable("users_teams")
+  return knex.schema.dropTable("users_teams").dropTable("team")
 }

@@ -8,7 +8,7 @@ import passport from "passport"
 import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
-import { sleep } from "./common/lib/util"
+import { isProduction, sleep } from "./common/lib/util"
 import ON_DEATH from "death"
 
 const KnexSessionStore = require("connect-session-knex")(session)
@@ -19,7 +19,7 @@ async function init() {
   // init knex
   Model.knex(knex)
 
-  if (process.env.NODE_ENV == "production") {
+  if (isProduction()) {
     await knex.migrate.latest()
     await knex.seed.run()
   }
@@ -40,6 +40,9 @@ async function init() {
   // create Express app
   const app = express()
 
+  // for cookies in deployment
+  isProduction() && app.set('trust proxy', 1)
+
   // add session capability to app
   app.use(
     session({
@@ -50,7 +53,8 @@ async function init() {
       store,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isProduction(),
+        sameSite: "none",
         maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
       },
     })
@@ -69,12 +73,12 @@ async function init() {
     },
   })
 
-  const port = process.env.PORT ?? 4000
+  const port = +process.env.PORT ?? 4000
 
   // start GraphQL server
   return new Promise((resolve, rejects) => {
-    server = app.listen({ port }, () => {
-      console.info(`GraphQL server ready at http://localhost:${port}${apolloServer.graphqlPath}`)
+    server = app.listen(port, isProduction() ? "0.0.0.0" : "localhost", () => {
+      console.info(`GraphQL server ready at ${process.env.API_BASE_PATH ?? "http://localhost:" + port}${apolloServer.graphqlPath}`)
       resolve()
     })
   })
@@ -114,8 +118,10 @@ const gracefullyShutDown = (signal: string) => {
     `\nReceived ${signal} signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
   )
 
-  return apolloServer
-    .stop()
+  return new Promise((resolve) => {
+    !!apolloServer ? apolloServer
+      .stop() : resolve()
+  })
     .then(() => {
       console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
     })

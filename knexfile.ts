@@ -1,6 +1,6 @@
 const knexSettings = {
   development: {
-    client: "postgresql",
+    client: "pg",
     connection: {
       user: "postgres",
       password: "admin",
@@ -16,8 +16,8 @@ const knexSettings = {
     debug: false,
   },
   production: {
-    client: "postgresql",
-    connectionString: process.env.DATABASE_URL,
+    client: "pg",
+    connection: process.env.DATABASE_URL,
     migrations: {
       directory: "./db/migrations",
       tableName: "knex_migrations",

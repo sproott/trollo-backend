@@ -3,6 +3,7 @@ import { buildSchema } from "type-graphql"
 import { ApolloServerExpressConfig } from "apollo-server-express"
 import buildContext from "./buildContext"
 import customAuthChecker from "../auth/authChecker"
+import { isProduction } from "../common/lib/util"
 
 export default async function getApolloConfig(dirname: string) {
   // build GraphQL schema
@@ -15,13 +16,13 @@ export default async function getApolloConfig(dirname: string) {
   const configuration: ApolloServerExpressConfig = {
     schema,
     context: ({ req, res }) => buildContext(req, res),
-    playground: process.env.NODE_ENV !== "production" && {
+    playground: !isProduction() && {
       settings: {
         "request.credentials": "include",
       },
     },
-    introspection: process.env.NODE_ENV !== "production",
-    tracing: process.env.NODE_ENV !== "production",
+    introspection: !isProduction(),
+    tracing: !isProduction(),
   }
 
   return configuration

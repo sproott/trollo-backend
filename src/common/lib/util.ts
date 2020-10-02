@@ -9,3 +9,7 @@ export const sleep = (ms: number): Promise<void> => {
     setTimeout(resolve, ms)
   })
 }
+
+export const isProduction = () => {
+  return process.env.NODE_ENV == "production"
+}

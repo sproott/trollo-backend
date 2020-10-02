@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start:dev": "set NODE_ENV=development&& tsnd --transpile-only --deps --respawn ./src/index.ts",
-    "start": "node ./build/src/index.js ",
+    "start": "cd build && node ./src/index.js ",
     "build": "tsc"
   },
   "dependencies": {
@@ -26,7 +26,7 @@
     "express-session": "^1.17.1",
     "graphql": "^15.3.0",
     "graphql-tools": "^6.2.2",
-    "knex": "^0.21.5",
+    "knex": "^0.21.6",
     "objection": "^2.2.3",
     "passport": "^0.4.1",
     "passport-strategy": "^1.0.0",
@@ -46,6 +46,7 @@
     "@types/node": "^14.10.2",
     "@types/passport": "^1.0.4",
     "@types/passport-strategy": "^0.2.35",
+    "@types/pg": "^7.14.5",
     "@types/ramda": "^0.27.17",
     "@types/string": "^0.0.30",
     "@types/uuid": "^8.3.0",

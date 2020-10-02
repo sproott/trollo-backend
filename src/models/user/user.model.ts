@@ -10,7 +10,6 @@ export default class User extends Model {
     return "user"
   }
 
-  @Authorized(Role.APP_ADMIN)
   @Field(() => ID)
   id: string
 

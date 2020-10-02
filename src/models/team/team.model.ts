@@ -1,6 +1,5 @@
-import { Authorized, Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
 import { Model } from "objection"
-import Role from "../../auth/types/role"
 import User from "../user/user.model"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Board from "../board/board.model"
@@ -11,7 +10,6 @@ export default class Team extends Model {
     return "team"
   }
 
-  @Authorized(Role.APP_ADMIN)
   @Field(() => ID)
   id: string
 

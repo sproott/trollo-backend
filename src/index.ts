@@ -9,7 +9,6 @@ import { ApolloServer } from "apollo-server-express"
 import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
 import { sleep } from "./common/lib/util"
-import { Container } from "typescript-ioc"
 import ON_DEATH from "death"
 
 const KnexSessionStore = require("connect-session-knex")(session)

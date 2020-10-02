@@ -7,6 +7,9 @@
   "author": "sproott <david.hrabe12@seznam.cz>",
   "license": "MIT",
   "private": true,
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "start:dev": "set NODE_ENV=development&& tsnd --transpile-only --deps --respawn ./src/index.ts",
     "start": "node ./build/src/index.js ",

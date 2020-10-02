@@ -69,10 +69,12 @@ async function init() {
     },
   })
 
+  const port = process.env.PORT ?? 4000
+
   // start GraphQL server
   return new Promise((resolve, rejects) => {
-    server = app.listen({ port: 4000 }, () => {
-      console.info(`GraphQL server ready at http://localhost:4000${apolloServer.graphqlPath}`)
+    server = app.listen({ port }, () => {
+      console.info(`GraphQL server ready at http://localhost:${port}${apolloServer.graphqlPath}`)
       resolve()
     })
   })

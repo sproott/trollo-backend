@@ -4,7 +4,7 @@ const knexSettings = {
     connection: {
       user: "postgres",
       password: "admin",
-      database: "trollo-dev",
+      database: "trollo_dev",
     },
     migrations: {
       directory: "./db/migrations",

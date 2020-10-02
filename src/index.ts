@@ -19,6 +19,11 @@ async function init() {
   // init knex
   Model.knex(knex)
 
+  if (process.env.NODE_ENV == "production") {
+    await knex.migrate.latest()
+    await knex.seed.run()
+  }
+
   const store = new KnexSessionStore({
     knex,
     tablename: "sessions",
@@ -60,7 +65,7 @@ async function init() {
     app,
     cors: {
       credentials: true,
-      origin: "http://localhost:3000",
+      origin: ["http://localhost:3000", "https://trollo-frontend.vercel.app"],
     },
   })
 

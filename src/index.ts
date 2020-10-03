@@ -47,7 +47,7 @@ async function init() {
   app.use(
     session({
       genid: (req) => uuid(),
-      secret: "bruhmoment01",
+      secret: process.env.SESSION_SECRET ?? "y-L%@V!*s=A6R4Bv",
       resave: false,
       saveUninitialized: false,
       store,

@@ -54,7 +54,7 @@ async function init() {
       cookie: {
         httpOnly: true,
         secure: isProduction(),
-        sameSite: "none",
+        sameSite: isProduction() ? "none" : undefined,
         maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
       },
     })
@@ -73,7 +73,7 @@ async function init() {
     },
   })
 
-  const port = +process.env.PORT ?? 4000
+  const port = +(process.env.PORT ?? 4000)
 
   // start GraphQL server
   return new Promise((resolve, rejects) => {

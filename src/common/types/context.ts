@@ -7,7 +7,8 @@ import { AuthenticateReturn } from "../../init/buildContext"
 export default interface Context {
   isAuthenticated: () => boolean
   isUnauthenticated: () => boolean
-  getUser: () => User
+  getUser: () => Promise<User>
+  getUserId: () => string
 
   authenticate(strategyName: string, options: LoginInput): Promise<AuthenticateReturn>
 

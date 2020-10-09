@@ -8,9 +8,8 @@ export default function buildContext(req: express.Request, res: express.Response
   return {
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),
-    getUser: async () => {
-      return (req.user as UserWrapper)?.getUser()
-    },
+    getUser: () => (req.user as UserWrapper)?.getUser(),
+    getUserId: () => (req.user as UserWrapper).id,
     authenticate: (strategyName: string, options: AuthenticateOptions) => {
       return new Promise<AuthenticateReturn>((resolve, reject) => {
         const done = (err?: Error, user?: User, info?: IVerifyOptions) => {

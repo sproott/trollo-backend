@@ -13,7 +13,7 @@ const knexSettings = {
     seeds: {
       directory: "./db/seeds",
     },
-    debug: false,
+    debug: true,
   },
   production: {
     client: "pg",
@@ -26,7 +26,7 @@ const knexSettings = {
       directory: "./db/seeds",
     },
     debug: false,
-  }
+  },
 }
 
 export default knexSettings

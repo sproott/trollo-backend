@@ -1,3 +1,4 @@
+import { raw } from "objection"
 import { Singleton } from "typescript-ioc"
 import User from "./user.model"
 
@@ -30,7 +31,7 @@ export class UserService {
   }
 
   private findByCaseInsensitive(column: Column, value: string) {
-    return User.query().whereRaw("LOWER(" + column + ") = ?", value.toLowerCase())
+    return User.query().where(raw("LOWER(" + column + ")"), value.toLowerCase())
   }
 }
 

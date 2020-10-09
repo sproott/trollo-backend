@@ -8,6 +8,14 @@ export default class TeamResolver {
   @Mutation(() => Team, { nullable: true })
   async createTeam(@Arg("name") name: string, @Ctx() ctx: Context) {
     const currentUser = await ctx.getUser()
+
+    const [existingTeam] = await currentUser
+      .$relatedQuery("ownTeams")
+      .whereRaw("LOWER(name) = ?", name.toLowerCase())
+    if (!!existingTeam) {
+      return null
+    }
+
     const newTeam = { name } as Team
     return currentUser.$relatedQuery("ownTeams").insert(newTeam)
   }

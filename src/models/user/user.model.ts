@@ -22,11 +22,11 @@ export default class User extends Model {
   password: string
 
   @UseMiddleware(AutoLoader)
-  @Field(() => [Team])
+  @Field(() => [Team], { nullable: true })
   ownTeams: Team[]
 
   @UseMiddleware(AutoLoader)
-  @Field(() => [Team])
+  @Field(() => [Team], { nullable: true })
   teams: Team[]
 
   @Field()

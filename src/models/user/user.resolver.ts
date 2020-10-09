@@ -28,7 +28,7 @@ export default class UserResolver {
   @Authorized(Role.APP_ADMIN)
   @Query(() => [User])
   async users() {
-    return User.query().select()
+    return User.query()
   }
 
   @Mutation(() => User)

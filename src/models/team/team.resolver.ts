@@ -11,9 +11,9 @@ export default class TeamResolver {
   async createTeam(@Arg("name") name: string, @Ctx() ctx: Context) {
     const currentUser = await ctx.getUser()
 
-    const [existingTeam] = await currentUser
+    const existingTeam = await currentUser
       .$relatedQuery("ownTeams")
-      .where(raw("LOWER(name)"), name.toLowerCase())
+      .findOne(raw("LOWER(name)"), name.toLowerCase())
     if (!!existingTeam) {
       return null
     }

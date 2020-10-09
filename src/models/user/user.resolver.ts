@@ -50,12 +50,12 @@ export default class UserResolver {
     const error: RegisterError = new RegisterError()
     const response = new RegisterResponse()
     let throwError = false
-    const foundEmail = !!(await this.userService.findByEmail(input.email))[0]
+    const foundEmail = !!(await this.userService.findByEmail(input.email))
     if (foundEmail) {
       error.email = true
       throwError = true
     }
-    const foundUsername = !!(await this.userService.findByUsername(input.username))[0]
+    const foundUsername = !!(await this.userService.findByUsername(input.username))
     if (foundUsername) {
       error.username = true
       throwError = true

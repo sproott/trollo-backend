@@ -24,9 +24,9 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
     let { usernameOrEmail, password } = input
     let user: User
     if (S(usernameOrEmail).contains("@")) {
-      user = (await this.userService.findByEmail(usernameOrEmail))[0]
+      user = await this.userService.findByEmail(usernameOrEmail)
     } else {
-      user = (await this.userService.findByUsername(usernameOrEmail))[0]
+      user = await this.userService.findByUsername(usernameOrEmail)
     }
     if (!user) {
       done(new Error("User doesn't exist"), null)

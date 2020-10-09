@@ -9,11 +9,11 @@ export class UserService {
   }
 
   findByUsername(username: string, caseInsensitive = true) {
-    return this.findBy(Column.USERNAME, username, caseInsensitive)
+    return this.findOne(Column.USERNAME, username, caseInsensitive)
   }
 
   findByEmail(email: string, caseInsensitive = true) {
-    return this.findBy(Column.EMAIL, email, caseInsensitive)
+    return this.findOne(Column.EMAIL, email, caseInsensitive)
   }
 
   insertOne(user: User) {
@@ -24,14 +24,14 @@ export class UserService {
     return User.query().insert(users)
   }
 
-  private findBy(column: Column, value: string, caseInsensitive = true) {
+  private findOne(column: Column, value: string, caseInsensitive = true) {
     return caseInsensitive
-      ? this.findByCaseInsensitive(column, value)
-      : User.query().where(column, "=", value)
+      ? this.findOneCaseInsensitive(column, value)
+      : User.query().findOne(column, value)
   }
 
-  private findByCaseInsensitive(column: Column, value: string) {
-    return User.query().where(raw("LOWER(" + column + ")"), value.toLowerCase())
+  private findOneCaseInsensitive(column: Column, value: string) {
+    return User.query().findOne(raw("LOWER(" + column + ")"), value.toLowerCase())
   }
 }
 

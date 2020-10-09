@@ -9,7 +9,7 @@ export default function buildContext(req: express.Request, res: express.Response
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),
     getUser: async () => {
-      return await (req.user as UserWrapper)?.getUser()
+      return (req.user as UserWrapper)?.getUser()
     },
     authenticate: (strategyName: string, options: AuthenticateOptions) => {
       return new Promise<AuthenticateReturn>((resolve, reject) => {

@@ -5,7 +5,7 @@ import { Inject } from "typescript-ioc"
 import { UserService } from "./user.service"
 import Context from "../../common/types/context"
 import PassportStrategyType from "../../auth/enum/PassportStrategyType"
-import { RegisterError, RegisterResponse } from "./types/registerError"
+import { RegisterError, RegisterResponse } from "./types/register"
 import Role from "../../auth/types/role"
 import { hash } from "../../common/lib/crypt"
 

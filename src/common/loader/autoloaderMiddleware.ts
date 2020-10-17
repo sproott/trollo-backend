@@ -19,7 +19,6 @@ const mappings = {
 export const AutoLoader: MiddlewareFn = async ({
   root,
   context,
-  args,
   info,
 }: {
   root: Model
@@ -35,7 +34,6 @@ export const AutoLoader: MiddlewareFn = async ({
       `Error: Relation "${info.fieldName}" missing in relation mappings of class "${root.constructor.name}"`
     )
   }
-  const idColumn = model.idColumn
   let loader: Loader
   if (field.relation.name in mappings) {
     loader = context.loaderContainer.getLoader({
@@ -46,10 +44,6 @@ export const AutoLoader: MiddlewareFn = async ({
   } else {
     throw new Error("Unsupported: AutoLoad given an unknown relation.")
   }
-  if (typeof idColumn == "string") {
-    // @ts-ignore
-    return loader.load(root[getColumnName(field.join.from)])
-  } else {
-    throw new Error("Unsupported: Loader.load given array of keys.")
-  }
+  // @ts-ignore
+  return loader.load(root[getColumnName(field.join.from)])
 }

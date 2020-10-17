@@ -43,8 +43,7 @@ export default class Loader {
   };
 
   [LoaderType.ManyToMany] = async (keys: string[]) => {
-    const models = await this.relatedModel
-      .query()
+    const models = await this.relatedModel.query()
       .select(this.joinTableOwnerColumn, this.relatedModel.tableName + ".*")
       .join(this.joinTableName, this.relatedColumn, this.joinTableRelatedColumn)
       .whereIn(this.joinTableOwnerColumn, keys)

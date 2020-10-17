@@ -1,9 +1,9 @@
 import Team from "./team.model"
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql"
+import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql"
 import Context from "../../common/types/context"
 import User from "../user/user.model"
 import { raw } from "objection"
-import { CreateTeamResponse } from "./types/createTeam"
+import CreateTeamResponse from "./types/createTeam"
 
 @Resolver(Team)
 export default class TeamResolver {

@@ -1,10 +1,10 @@
-import Team from "../team.model"
 import { Field, ObjectType } from "type-graphql"
+import Board from "../board.model"
 
 @ObjectType()
-export default class CreateTeamResponse {
+export default class CreateBoardResponse {
   @Field({ nullable: true })
-  team?: Team
+  board?: Board
 
   @Field({ nullable: true })
   exists?: boolean

@@ -15,7 +15,7 @@ const col = (prop: Objection.RelationProperty) => {
 }
 
 const mapKeysToModels = (keys: string[], models: { [key: string]: Model[] }) => {
-  return map((key) => models[key] || undefined, keys)
+  return map((key) => models[key] || [], keys)
 }
 
 export default class Loader {

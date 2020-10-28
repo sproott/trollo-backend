@@ -79,7 +79,7 @@ export default class UserResolver {
   @Mutation(() => Boolean)
   async makeAdmin(@Arg("username") username: string) {
     const numUpdated = await this.userService.findByUsername(username).patch({
-      isAdmin: true,
+      is_admin: true,
     })
 
     return !!numUpdated

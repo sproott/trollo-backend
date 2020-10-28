@@ -1,8 +1,5 @@
-import { Authorized, Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Field, ID, ObjectType } from "type-graphql"
 import { Model } from "objection"
-import Role from "../../auth/types/role"
-import User from "../user/user.model"
-import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 
 @ObjectType()
 export default class Card extends Model {
@@ -10,7 +7,6 @@ export default class Card extends Model {
     return "card"
   }
 
-  @Authorized(Role.APP_ADMIN)
   @Field(() => ID)
   id: string
 

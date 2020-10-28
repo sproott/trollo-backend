@@ -23,7 +23,7 @@ export default class TeamResolver {
     }
 
     const newTeam = await Team.query().insertAndFetch({ name })
-    await Participant.query().insert({ user_id: ctx.getUserId(), team_id: newTeam.id, admin: true })
+    await Participant.query().insert({ user_id: ctx.getUserId(), team_id: newTeam.id, owner: true })
     return { team: newTeam }
   }
 

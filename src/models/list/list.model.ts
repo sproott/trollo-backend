@@ -18,7 +18,7 @@ export default class List extends Model {
   @Field()
   name: string
 
-  @UseMiddleware(AutoLoader)
+  @UseMiddleware(AutoLoader())
   @Field(() => [Card], { nullable: true })
   cards?: Card[]
 

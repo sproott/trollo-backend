@@ -2,12 +2,12 @@ import * as Knex from "knex"
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.alterTable("user", (table) => {
-    table.boolean("isAdmin").defaultTo(false)
+    table.boolean("is_admin").defaultTo(false)
   })
 }
 
 export async function down(knex: Knex): Promise<void> {
   return knex.schema.alterTable("user", (table) => {
-    table.dropColumn("isAdmin")
+    table.dropColumn("is_admin")
   })
 }

@@ -8,7 +8,15 @@ export enum LoaderType {
   ManyToMany,
 }
 
-export type LoaderParams = { model: typeof Model; fieldName: string; type: LoaderType }
+export type ConditionFn = (
+  qb: Objection.QueryBuilder<Objection.Model, Objection.Model[]>
+) => Objection.QueryBuilder<Objection.Model, Objection.Model[]>
+
+export type LoaderParams = {
+  model: typeof Model
+  fieldName: string
+  type: LoaderType
+}
 
 const col = (prop: Objection.RelationProperty) => {
   return prop.cols[0]
@@ -23,10 +31,13 @@ export default class Loader {
 
   readonly relation: Relation
 
-  readonly dataLoader;
+  readonly dataLoader
+
+  customCondition?: ConditionFn;
 
   [LoaderType.BelongsToOne] = async (keys: string[]) => {
-    const models = await this.query(keys)
+    const query = this.query(keys)
+    const models = await this.process(query)
     const modelMap: { [key: string]: Model } = {}
     models.forEach((m) => {
       // @ts-ignore
@@ -36,28 +47,40 @@ export default class Loader {
   };
 
   [LoaderType.HasMany] = async (keys: string[]) => {
-    const models = await this.query(keys)
+    const query = this.query(keys)
+    const models = await this.process(query)
     // @ts-ignore
     const groupedModels = groupBy((m) => m[this.relatedColumnName], models)
     return mapKeysToModels(keys, groupedModels)
   };
 
   [LoaderType.ManyToMany] = async (keys: string[]) => {
-    const models = await this.relatedModel.query()
-      .select(this.joinTableOwnerColumn, this.relatedModel.tableName + ".*")
+    const query = this.relatedModel
+      .query()
+      .select(
+        this.joinTableOwnerColumn,
+        this.relatedModel.tableName + ".*",
+        this.joinTableName + ".*"
+      )
       .join(this.joinTableName, this.relatedColumn, this.joinTableRelatedColumn)
       .whereIn(this.joinTableOwnerColumn, keys)
+    const models = await this.process(query)
     // @ts-ignore
     const groupedModels = groupBy((m) => m[this.joinTableOwnerColumnName], models)
     return mapKeysToModels(keys, groupedModels)
   }
 
-  query = async (keys: string[]) => {
+  query = (keys: string[]) => {
     return this.relatedModel.query().whereIn(this.relatedColumn, keys)
   }
 
-  load = async (key: string) => {
-    return this.dataLoader.load(key)
+  process = async (query: Objection.QueryBuilder<Objection.Model, Objection.Model[]>) => {
+    return !!this.customCondition ? this.customCondition(query) : query
+  }
+
+  load = async (key: string, customCondition?: ConditionFn) => {
+    this.customCondition = customCondition
+    return await this.dataLoader.load(key)
   }
 
   constructor({ model, fieldName, type }: LoaderParams) {

@@ -2,7 +2,7 @@ import * as Knex from "knex"
 import { hash } from "../../src/common/lib/crypt"
 
 export async function seed(knex: Knex): Promise<void> {
-  await knex("users_teams").del()
+  await knex("participant").del()
   await knex("team").del()
 
   await knex("user").del()
@@ -29,7 +29,7 @@ export async function seed(knex: Knex): Promise<void> {
       id: "960bbd7d-c49f-4218-aeba-c237591d2fb8",
       username: "AppAdmin",
       email: "admin@trollo.com",
-      isAdmin: true,
+      is_admin: true,
       password: await hash("omegalul"),
     },
   ])

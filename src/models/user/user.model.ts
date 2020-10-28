@@ -1,8 +1,9 @@
-import { Authorized, Field, ID, ObjectType, UseMiddleware } from "type-graphql"
-import { Model } from "objection"
-import Role from "../../auth/types/role"
+import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Model, RelationMappings } from "objection"
 import Team from "../team/team.model"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
+import { Participant } from "../participant/participant.model"
+import { concat } from "ramda"
 
 @ObjectType()
 export default class User extends Model {
@@ -21,37 +22,39 @@ export default class User extends Model {
 
   password: string
 
-  @UseMiddleware(AutoLoader)
-  @Field(() => [Team], { nullable: true })
-  ownTeams: Team[]
+  @UseMiddleware(
+    AutoLoader({
+      relationName: "participants",
+      customCondition: (qb) => {
+        return qb.where("participant.owner", false)
+      },
+    })
+  )
+  @Field(() => [Participant])
+  participatesIn: Participant[]
 
-  @UseMiddleware(AutoLoader)
-  @Field(() => [Team], { nullable: true })
-  teams: Team[]
+  @UseMiddleware(
+    AutoLoader({
+      relationName: "participants",
+      customCondition: (qb) => {
+        return qb.where("participant.owner", true)
+      },
+    })
+  )
+  @Field(() => [Participant])
+  owns: Participant[]
 
   @Field()
-  isAdmin: boolean
+  is_admin: boolean
 
-  static get relationMappings() {
+  static get relationMappings(): RelationMappings {
     return {
-      ownTeams: {
+      participants: {
         relation: Model.HasManyRelation,
-        modelClass: Team,
+        modelClass: Participant,
         join: {
           from: "user.id",
-          to: "team.admin_id",
-        },
-      },
-      teams: {
-        relation: Model.ManyToManyRelation,
-        modelClass: Team,
-        join: {
-          from: "user.id",
-          through: {
-            from: "users_teams.user_id",
-            to: "users_teams.team_id",
-          },
-          to: "team.id",
+          to: "participant.user_id",
         },
       },
     }

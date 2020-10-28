@@ -31,7 +31,7 @@ export class UserService {
   }
 
   private findOneCaseInsensitive(column: Column, value: string) {
-    return User.query().findOne(raw("LOWER(" + column + ")"), value.toLowerCase())
+    return User.query().findOne(raw('LOWER("user"."' + column + '")'), value.toLowerCase())
   }
 }
 

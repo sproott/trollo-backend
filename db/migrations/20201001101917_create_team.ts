@@ -8,8 +8,8 @@ export async function up(knex: Knex): Promise<void> {
       table.string("name")
     })
     .createTable("users_teams", (table) => {
-      table.uuid("user_id").references("user.id")
-      table.uuid("team_id").references("team.id")
+      table.uuid("user_id").references("user.id").onDelete("CASCADE")
+      table.uuid("team_id").references("team.id").onDelete("CASCADE")
     })
 }
 

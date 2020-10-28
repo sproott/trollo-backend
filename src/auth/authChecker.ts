@@ -8,7 +8,7 @@ const customAuthChecker: AuthChecker<Context, Role> = async ({ context }, roles:
   const user = await context.getUser()
 
   if (roles.includes(Role.APP_ADMIN)) {
-    return user.isAdmin
+    return user.is_admin
   }
 
   return true

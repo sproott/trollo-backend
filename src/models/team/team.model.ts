@@ -3,6 +3,7 @@ import { Model } from "objection"
 import User from "../user/user.model"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Board from "../board/board.model"
+import { Participant } from "../participant/participant.model"
 
 @ObjectType()
 export default class Team extends Model {
@@ -16,23 +17,18 @@ export default class Team extends Model {
   @Field()
   name: string
 
-  @UseMiddleware(AutoLoader)
-  @Field(() => User)
-  admin: User
-  admin_id: string
-
-  @UseMiddleware(AutoLoader)
+  @UseMiddleware(AutoLoader())
   @Field(() => [Board], { nullable: true })
   boards?: Board[]
 
   static get relationMappings() {
     return {
-      admin: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
+      participants: {
+        relation: Model.HasManyRelation,
+        modelClass: Participant,
         join: {
-          from: "team.admin_id",
-          to: "user.id",
+          from: "team.id",
+          to: "participant.team_id",
         },
       },
       boards: {

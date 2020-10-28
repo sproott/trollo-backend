@@ -1,31 +1,40 @@
 import Team from "./team.model"
 import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql"
 import Context from "../../common/types/context"
-import User from "../user/user.model"
 import { raw } from "objection"
 import CreateTeamResponse from "./types/createTeam"
+import { Participant } from "../participant/participant.model"
+import { TeamService } from "./team.service"
+import { Inject } from "typescript-ioc"
 
 @Resolver(Team)
 export default class TeamResolver {
+  @Inject
+  teamService: TeamService
+
   @Authorized()
   @Mutation(() => CreateTeamResponse)
   async createTeam(@Arg("name") name: string, @Ctx() ctx: Context): Promise<CreateTeamResponse> {
-    const currentUser = await ctx.getUser()
-
-    const existingTeam = await currentUser
-      .$relatedQuery("ownTeams")
-      .findOne(raw("LOWER(name)"), name.toLowerCase())
+    const existingTeam = await this.teamService
+      .ownTeams(ctx.getUserId())
+      .findOne(raw('LOWER("team"."name")'), name.toLowerCase())
     if (!!existingTeam) {
       return { exists: true }
     }
 
-    const newTeam = { name } as Team
-    return { team: await currentUser.$relatedQuery("ownTeams").insert(newTeam) }
+    const newTeam = await Team.query().insertAndFetch({ name })
+    await Participant.query().insert({ user_id: ctx.getUserId(), team_id: newTeam.id, admin: true })
+    return { team: newTeam }
   }
 
   @Authorized()
   @Mutation(() => Boolean, { nullable: true })
   async deleteTeam(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return (await User.relatedQuery("ownTeams").for(ctx.getUserId()).deleteById(id)) > 0
+    return (
+      (await Team.query()
+        .delete()
+        .whereIn("team.id", this.teamService.ownTeams(ctx.getUserId()).select("team.id"))
+        .andWhere("team.id", id)) > 0
+    )
   }
 }

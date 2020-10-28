@@ -15,7 +15,7 @@ export default class Board extends Model {
   @Field()
   name: string
 
-  @UseMiddleware(AutoLoader)
+  @UseMiddleware(AutoLoader())
   @Field(() => [List], { nullable: true })
   lists?: List[]
 

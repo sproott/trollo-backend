@@ -13,11 +13,11 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: "75011cb8-6da4-49ce-ac1d-e8e38a245b5b",
-      name: "owner team 1",
+      name: "Admin team 1",
     },
     {
       id: "68cce4ac-1a40-44a3-9d9a-865a34e64b6c",
-      name: "owner team 2",
+      name: "Admin team 2",
     },
   ])
 

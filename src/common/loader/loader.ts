@@ -14,7 +14,7 @@ export type ConditionFn = (
 
 export type LoaderParams = {
   model: typeof Model
-  fieldName: string
+  relationName: string
   type: LoaderType
 }
 
@@ -83,9 +83,9 @@ export default class Loader {
     return await this.dataLoader.load(key)
   }
 
-  constructor({ model, fieldName, type }: LoaderParams) {
+  constructor({ model, relationName, type }: LoaderParams) {
     this.model = model
-    this.relation = model.getRelation(fieldName)
+    this.relation = model.getRelation(relationName)
     if (type === LoaderType.BelongsToOne) {
       this.dataLoader = new DataLoader<string, Model>(this[type])
     } else {

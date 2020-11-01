@@ -1,9 +1,7 @@
 import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
-import Team from "../team/team.model"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import { Participant } from "../participant/participant.model"
-import { concat } from "ramda"
 
 @ObjectType()
 export default class User extends Model {
@@ -26,23 +24,23 @@ export default class User extends Model {
     AutoLoader({
       relationName: "participants",
       customCondition: (qb) => {
-        return qb.where("participant.owner", false)
-      },
-    })
-  )
-  @Field(() => [Participant])
-  participatesIn: Participant[]
-
-  @UseMiddleware(
-    AutoLoader({
-      relationName: "participants",
-      customCondition: (qb) => {
         return qb.where("participant.owner", true)
       },
     })
   )
   @Field(() => [Participant])
   owns: Participant[]
+
+  @UseMiddleware(
+    AutoLoader({
+      relationName: "participants",
+      customCondition: (qb) => {
+        return qb.where("participant.owner", false)
+      },
+    })
+  )
+  @Field(() => [Participant])
+  participatesIn: Participant[]
 
   @Field()
   is_admin: boolean

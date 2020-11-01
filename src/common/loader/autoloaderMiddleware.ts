@@ -1,7 +1,7 @@
 import { MiddlewareFn } from "type-graphql"
 import Context from "../types/context"
 import { Model } from "objection"
-import Loader, { LoaderType, ConditionFn } from "./loader"
+import Loader, { ConditionFn, LoaderType } from "./loader"
 import { getColumnName } from "../lib/util"
 
 const mappings = {
@@ -42,7 +42,8 @@ export const AutoLoader = (params?: {
   if (field.relation.name in mappings) {
     loader = context.loaderContainer.getLoader({
       ...mappings[field.relation.name],
-      fieldName: params?.relationName || info.fieldName,
+      fieldName: info.fieldName,
+      relationName: params?.relationName || info.fieldName,
       model,
     })
   } else {

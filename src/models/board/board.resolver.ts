@@ -6,7 +6,6 @@ import CreateBoardResponse from "./types/createBoard"
 import { UserService } from "../user/user.service"
 import { Inject } from "typescript-ioc"
 import { BoardService } from "./board.service"
-import Team from "../team/team.model"
 import { TeamService } from "../team/team.service"
 
 @Resolver(Board)
@@ -44,8 +43,7 @@ export default class BoardResolver {
       return { exists: true }
     }
 
-    const newBoard = { name } as Board
-    await team.$relatedQuery("boards").insert(newBoard)
+    const newBoard = await team.$relatedQuery("boards").insert({ name })
     return { board: newBoard }
   }
 

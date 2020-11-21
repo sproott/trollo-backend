@@ -9,7 +9,7 @@ export default class TeamService {
 
   teams = (userId: string, owner: boolean = undefined) => {
     const baseQuery = Team.query().joinRelated("participants").where("participants.user_id", userId)
-    return owner == undefined ? baseQuery : baseQuery.andWhere("participants.owner", owner)
+    return owner === undefined ? baseQuery : baseQuery.andWhere("participants.owner", owner)
   }
 
   team = (userId: string, teamId: string) => {

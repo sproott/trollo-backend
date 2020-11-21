@@ -79,7 +79,7 @@ async function init() {
   return new Promise((resolve, rejects) => {
     server = app.listen(port, isProduction() ? "0.0.0.0" : "localhost", () => {
       console.info(`GraphQL server ready at ${process.env.API_BASE_PATH ?? "http://localhost:" + port}${apolloServer.graphqlPath}`)
-      resolve()
+      resolve(undefined)
     })
   })
 }
@@ -120,7 +120,7 @@ const gracefullyShutDown = (signal: string) => {
 
   return new Promise((resolve) => {
     !!apolloServer ? apolloServer
-      .stop() : resolve()
+      .stop() : resolve(undefined)
   })
     .then(() => {
       console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)

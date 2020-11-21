@@ -6,7 +6,7 @@ export default class HelloWorldResolver {
   @Query(() => HelloWorld)
   async greeting(@Arg("name", { nullable: true }) name: string) {
     const helloWorld = new HelloWorld()
-    helloWorld.greeting = "Hello, " + (name == null ? "World" : name)
+    helloWorld.greeting = "Hello, " + (name === null ? "World" : name)
     return helloWorld
   }
 }

@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Field, ID, Int, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import List from "../list/list.model"
@@ -15,7 +15,7 @@ export default class Card extends Model {
   @Field()
   name: string
 
-  @Field()
+  @Field(type => Int)
   index: number
 
   @UseMiddleware(AutoLoader())

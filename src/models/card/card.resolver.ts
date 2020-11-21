@@ -32,13 +32,13 @@ export default class CardResolver {
 
   @Authorized()
   @Mutation(() => Boolean)
-  async moveCard(@Arg("cardId") cardId: string, @Arg("listId", { nullable: true }) listId: string, @Arg("destinationIndex") destinationIndex: number, @Ctx() ctx: Context) {
+  async moveCard(@Arg("cardId") cardId: string, @Arg("listId", { nullable: true }) listId: string, @Arg("destinationIndex", type => Int) destinationIndex: number, @Ctx() ctx: Context) {
     const card = await this.cardService.card(ctx.getUserId(), cardId).withGraphFetched("list")
     if (!card) throw new Error("Card doesn't exist")
 
     if (!listId) {
       listId = card.list_id
-    } else if (listId != card.list_id && !(await this.listService.list(ctx.getUserId(), listId).where("list.board_id", card.list.board_id))) {
+    } else if (listId !== card.list_id && !(await this.listService.list(ctx.getUserId(), listId).where("list.board_id", card.list.board_id))) {
       return false
     }
 
@@ -47,11 +47,11 @@ export default class CardResolver {
     if (destinationIndex > nextIndex) destinationIndex = nextIndex
     const sourceIndex = card.index
 
-    if (listId == card.list_id && (sourceIndex == destinationIndex || (nextIndex == destinationIndex && sourceIndex + 1 == nextIndex))) return true
+    if (listId === card.list_id && (sourceIndex === destinationIndex || (nextIndex === destinationIndex && sourceIndex + 1 === nextIndex))) return true
 
     const cards = this.cardService.cards(ctx.getUserId()).where("list_id", listId)
 
-    if (listId == card.list_id) {
+    if (listId === card.list_id) {
       if (sourceIndex < destinationIndex) {
         await cards.patch({ index: raw("index - 1") }).where("index", ">", sourceIndex).andWhere("index", "<=", destinationIndex)
       } else {

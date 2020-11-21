@@ -1,6 +1,5 @@
 import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
-import { Model } from "objection"
-import User from "../user/user.model"
+import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Board from "../board/board.model"
 import { Participant } from "../participant/participant.model"
@@ -21,7 +20,7 @@ export default class Team extends Model {
   @Field(() => [Board], { nullable: true })
   boards?: Board[]
 
-  static get relationMappings() {
+  static get relationMappings(): RelationMappings {
     return {
       participants: {
         relation: Model.HasManyRelation,

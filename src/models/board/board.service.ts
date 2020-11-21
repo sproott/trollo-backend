@@ -1,19 +1,26 @@
 import Board from "./board.model"
-import User from "../user/user.model"
-import { Singleton } from "typescript-ioc"
+import { Inject, Singleton } from "typescript-ioc"
+import TeamService from "../team/team.service"
 
 @Singleton
-export class BoardService {
-  getOwnBoardById(boardId: string, userId: string) {
+export default class BoardService {
+  @Inject
+  private teamService: TeamService
+
+  getOwnBoardById = (boardId: string, userId: string) => {
     return Board.query()
       .findById(boardId)
       .whereIn(
-        "id",
-        User.query()
-          .findById(userId)
-          .select("participants:team:boards.id")
-          .joinRelated("participants.[team.[boards]]")
-          .where("participants.owner", true)
+        "team_id",
+        this.teamService.ownTeams(userId).select("team.id")
       )
+  }
+
+  boards = (userId: string) => {
+    return Board.query().whereIn("team_id", this.teamService.teams(userId).select("team.id"))
+  }
+
+  board = (userId: string, boardId: string) => {
+    return this.boards(userId).findById(boardId)
   }
 }

@@ -1,10 +1,10 @@
 import User from "./user.model"
 import { Inject } from "typescript-ioc"
-import { UserService } from "./user.service"
+import UserService from "./user.service"
 
 export default class UserWrapper {
   @Inject
-  userService: UserService
+  private userService: UserService
 
   id: string
 

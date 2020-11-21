@@ -4,13 +4,13 @@ import Context from "../../common/types/context"
 import { raw } from "objection"
 import CreateTeamResponse from "./types/createTeam"
 import { Participant } from "../participant/participant.model"
-import { TeamService } from "./team.service"
+import TeamService from "./team.service"
 import { Inject } from "typescript-ioc"
 
 @Resolver(Team)
 export default class TeamResolver {
   @Inject
-  teamService: TeamService
+  private teamService: TeamService
 
   @Authorized()
   @Mutation(() => CreateTeamResponse)

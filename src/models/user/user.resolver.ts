@@ -2,7 +2,7 @@ import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql"
 import User from "./user.model"
 import { LoginInput, RegisterInput } from "./user.input"
 import { Inject } from "typescript-ioc"
-import { UserService } from "./user.service"
+import UserService from "./user.service"
 import Context from "../../common/types/context"
 import PassportStrategyType from "../../auth/enum/PassportStrategyType"
 import { RegisterError, RegisterResponse } from "./types/register"
@@ -12,7 +12,7 @@ import { hash } from "../../common/lib/crypt"
 @Resolver(User)
 export default class UserResolver {
   @Inject
-  userService: UserService
+  private userService: UserService
 
   @Authorized(Role.APP_ADMIN)
   @Query(() => User)

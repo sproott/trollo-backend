@@ -1,7 +1,8 @@
 import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
-import { Model } from "objection"
+import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Card from "../card/card.model"
+import Board from "../board/board.model"
 
 @ObjectType()
 export default class List extends Model {
@@ -15,11 +16,16 @@ export default class List extends Model {
   @Field()
   name: string
 
-  @UseMiddleware(AutoLoader())
+  @UseMiddleware(AutoLoader({ customCondition: qb => qb.orderBy("card.index") }))
   @Field(() => [Card], { nullable: true })
   cards?: Card[]
 
-  static get relationMappings() {
+  @UseMiddleware(AutoLoader())
+  @Field(() => Board)
+  board: Board
+  board_id: string
+
+  static get relationMappings(): RelationMappings {
     return {
       cards: {
         relation: Model.HasManyRelation,
@@ -29,6 +35,14 @@ export default class List extends Model {
           to: "card.list_id",
         },
       },
+      team: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Board,
+        join: {
+          from: "list.board_id",
+          to: "board.id"
+        }
+      }
     }
   }
 }

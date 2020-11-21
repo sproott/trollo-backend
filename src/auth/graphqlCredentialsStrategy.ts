@@ -1,6 +1,6 @@
 import { Strategy as PassportStrategy } from "passport-strategy"
 import { Inject } from "typescript-ioc"
-import { UserService } from "../models/user/user.service"
+import UserService from "../models/user/user.service"
 import PassportStrategyType from "./enum/PassportStrategyType"
 import express from "express"
 import { LoginInput } from "../models/user/user.input"
@@ -11,7 +11,7 @@ import { compare } from "../common/lib/crypt"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject
-  userService: UserService
+  private userService: UserService
 
   name: string
 

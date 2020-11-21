@@ -1,5 +1,7 @@
-import { Field, ID, ObjectType } from "type-graphql"
-import { Model } from "objection"
+import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Model, RelationMappings } from "objection"
+import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
+import List from "../list/list.model"
 
 @ObjectType()
 export default class Card extends Model {
@@ -12,4 +14,25 @@ export default class Card extends Model {
 
   @Field()
   name: string
+
+  @Field()
+  index: number
+
+  @UseMiddleware(AutoLoader())
+  @Field(() => List)
+  list: List
+  list_id: string
+
+  static get relationMappings(): RelationMappings {
+    return {
+      list: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: List,
+        join: {
+          from: "card.list_id",
+          to: "list.id"
+        }
+      }
+    }
+  }
 }

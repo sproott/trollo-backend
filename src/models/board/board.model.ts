@@ -1,5 +1,5 @@
-import { Authorized, Field, ID, ObjectType, UseMiddleware } from "type-graphql"
-import { Model } from "objection"
+import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import List from "../list/list.model"
 
@@ -19,7 +19,7 @@ export default class Board extends Model {
   @Field(() => [List], { nullable: true })
   lists?: List[]
 
-  static get relationMappings() {
+  static get relationMappings(): RelationMappings {
     return {
       lists: {
         relation: Model.HasManyRelation,

@@ -3,21 +3,21 @@ import Board from "./board.model"
 import Context from "../../common/types/context"
 import { raw } from "objection"
 import CreateBoardResponse from "./types/createBoard"
-import { UserService } from "../user/user.service"
+import UserService from "../user/user.service"
 import { Inject } from "typescript-ioc"
-import { BoardService } from "./board.service"
-import { TeamService } from "../team/team.service"
+import BoardService from "./board.service"
+import TeamService from "../team/team.service"
 
 @Resolver(Board)
 export default class BoardResolver {
   @Inject
-  userService: UserService
+  private userService: UserService
 
   @Inject
-  boardService: BoardService
+  private boardService: BoardService
 
   @Inject
-  teamService: TeamService
+  private teamService: TeamService
 
   @Authorized()
   @Query(() => Board)

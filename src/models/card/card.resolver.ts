@@ -61,9 +61,9 @@ export default class CardResolver {
       return true
     } else {
       const sourceCards = this.cardService.cards(ctx.getUserId()).where("list_id", card.list_id)
-      await sourceCards.patch({ index: raw("index - 1") }).where("index", ">", sourceIndex).debug()
-      await cards.patch({ index: raw("index + 1") }).where("index", ">=", destinationIndex).debug()
-      await Card.query().patch({ index: destinationIndex, list_id: listId }).where("id", cardId).debug()
+      await sourceCards.patch({ index: raw("index - 1") }).where("index", ">", sourceIndex)
+      await cards.patch({ index: raw("index + 1") }).where("index", ">=", destinationIndex)
+      await Card.query().patch({ index: destinationIndex, list_id: listId }).where("id", cardId)
       return true
     }
   }

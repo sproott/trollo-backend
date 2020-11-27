@@ -11,7 +11,7 @@
     "node": "15.x"
   },
   "scripts": {
-    "start:dev": "set NODE_ENV=development&& tsnd --deps --respawn ./src/index.ts",
+    "dev": "set NODE_ENV=development&& tsnd --deps --respawn ./src/index.ts",
     "start": "cd build && node ./src/index.js ",
     "build": "tsc"
   },

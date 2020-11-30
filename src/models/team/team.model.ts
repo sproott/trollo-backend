@@ -17,8 +17,12 @@ export default class Team extends Model {
   name: string
 
   @UseMiddleware(AutoLoader())
-  @Field(() => [Board], { nullable: true })
-  boards?: Board[]
+  @Field(() => [Board])
+  boards: Board[]
+
+  @UseMiddleware(AutoLoader())
+  @Field(() => [Participant])
+  participants: Participant[]
 
   static get relationMappings(): RelationMappings {
     return {

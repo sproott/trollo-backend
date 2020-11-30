@@ -17,8 +17,8 @@ export default class List extends Model {
   name: string
 
   @UseMiddleware(AutoLoader({ customCondition: qb => qb.orderBy("card.index") }))
-  @Field(() => [Card], { nullable: true })
-  cards?: Card[]
+  @Field(() => [Card])
+  cards: Card[]
 
   @UseMiddleware(AutoLoader())
   @Field(() => Board)

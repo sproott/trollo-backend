@@ -16,8 +16,8 @@ export default class Board extends Model {
   name: string
 
   @UseMiddleware(AutoLoader())
-  @Field(() => [List], { nullable: true })
-  lists?: List[]
+  @Field(() => [List])
+  lists: List[]
 
   static get relationMappings(): RelationMappings {
     return {

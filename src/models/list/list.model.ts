@@ -35,7 +35,7 @@ export default class List extends Model {
           to: "card.list_id",
         },
       },
-      team: {
+      board: {
         relation: Model.BelongsToOneRelation,
         modelClass: Board,
         join: {

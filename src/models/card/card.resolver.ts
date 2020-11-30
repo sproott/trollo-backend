@@ -5,6 +5,8 @@ import ListService from "../list/list.service"
 import Context from "../../common/types/context"
 import CardService from "./card.service"
 import { raw } from "objection"
+import List from "../list/list.model";
+import CreateCardResponse from "./types/createCard";
 
 @Resolver(Card)
 export default class CardResolver {
@@ -15,24 +17,31 @@ export default class CardResolver {
   private cardService: CardService
 
   @Authorized()
-  @Mutation(() => Card)
+  @Mutation(() => CreateCardResponse)
   async createCard(@Arg("name") name: string, @Arg("listId") listId: string, @Ctx() ctx: Context) {
     const list = await this.listService.list(ctx.getUserId(), listId)
 
-    if (!!list) {
-      return Card.query().insert({
-        name,
-        index: await this.cardService.nextIndex(ctx.getUserId(), listId),
-        list_id: listId
-      })
+    if (!list) {
+      throw new Error("List doesn't exist")
     }
 
-    throw new Error("List doesn't exist")
+    const existingCard = await Card.query().whereIn("list_id", List.query().select("list.id").joinRelated("board").where("board.id", list.board_id))
+      .findOne(raw("LOWER(name)"), name.toLowerCase()).debug()
+    if (!!existingCard) {
+      return { exists: true }
+    }
+
+    const newCard = await Card.query().insert({
+      name,
+      index: await this.cardService.nextIndex(ctx.getUserId(), listId),
+      list_id: listId
+    })
+    return { card: newCard }
   }
 
   @Authorized()
   @Mutation(() => Boolean)
-  async moveCard(@Arg("cardId") cardId: string, @Arg("listId", { nullable: true }) listId: string, @Arg("destinationIndex", type => Int) destinationIndex: number, @Ctx() ctx: Context) {
+  async moveCard(@Arg("cardId") cardId: string, @Arg("listId", { nullable: true }) listId: string, @Arg("destinationIndex", () => Int) destinationIndex: number, @Ctx() ctx: Context) {
     const card = await this.cardService.card(ctx.getUserId(), cardId).withGraphFetched("list")
     if (!card) throw new Error("Card doesn't exist")
 

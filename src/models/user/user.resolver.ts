@@ -83,6 +83,6 @@ export default class UserResolver {
       is_admin: true,
     })
 
-    return !!numUpdated
+    return numUpdated > 0
   }
 }

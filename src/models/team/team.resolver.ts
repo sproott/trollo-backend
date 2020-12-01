@@ -46,9 +46,10 @@ export default class TeamResolver {
     if (name.length == 0) throw new Error("Name is empty")
     const existingTeam = await this.teamService
       .ownTeams(ctx.userId)
-      .where(raw("LOWER(team.name)"), name.toLowerCase())
+      .findOne(raw("LOWER(team.name)"), name.toLowerCase())
     if (!!existingTeam) {
-      return { exists: true }
+      if (existingTeam.id === teamId) return { success: true }
+      else return { exists: true }
     }
     const affected = await Team.query()
       .patch({ name })

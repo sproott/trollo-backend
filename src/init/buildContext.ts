@@ -11,7 +11,7 @@ export default function buildContext(req: express.Request, res: express.Response
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),
     getUser: () => (req.user as UserWrapper)?.getUser(),
-    userId: (req.user as UserWrapper).id,
+    userId: (req?.user as UserWrapper)?.id,
     authenticate: (strategyName: string, options: LoginInput) => {
       return new Promise<AuthenticateReturn>((resolve, reject) => {
         const done = (err?: Error, user?: User, info?: IVerifyOptions) => {

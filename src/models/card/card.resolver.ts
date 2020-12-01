@@ -20,7 +20,7 @@ export default class CardResolver {
   @Mutation(() => CreateCardResponse)
   async createCard(@Arg("name") name: string, @Arg("listId") listId: string, @Ctx() ctx: Context) {
     if (name.length == 0) throw new Error("Name is empty")
-    const list = await this.listService.list(ctx.getUserId(), listId)
+    const list = await this.listService.list(ctx.userId, listId)
 
     if (!list) {
       throw new Error("List doesn't exist")
@@ -39,7 +39,7 @@ export default class CardResolver {
 
     const newCard = await Card.query().insert({
       name,
-      index: await this.cardService.nextIndex(ctx.getUserId(), listId),
+      index: await this.cardService.nextIndex(ctx.userId, listId),
       list_id: listId,
     })
     return { card: newCard }
@@ -53,7 +53,7 @@ export default class CardResolver {
     @Arg("destinationIndex", () => Int) destinationIndex: number,
     @Ctx() ctx: Context
   ) {
-    const card = await this.cardService.card(ctx.getUserId(), cardId).withGraphFetched("list")
+    const card = await this.cardService.card(ctx.userId, cardId).withGraphFetched("list")
     if (!card) throw new Error("Card doesn't exist")
 
     if (!listId) {
@@ -61,13 +61,13 @@ export default class CardResolver {
     } else if (
       listId !== card.list_id &&
       !(await this.listService
-        .list(ctx.getUserId(), listId)
+        .list(ctx.userId, listId)
         .where("list.board_id", card.list.board_id))
     ) {
       return false
     }
 
-    const nextIndex = await this.cardService.nextIndex(ctx.getUserId(), listId)
+    const nextIndex = await this.cardService.nextIndex(ctx.userId, listId)
 
     if (destinationIndex > nextIndex) destinationIndex = nextIndex
     const sourceIndex = card.index
@@ -79,7 +79,7 @@ export default class CardResolver {
     )
       return true
 
-    const cards = this.cardService.cards(ctx.getUserId()).where("list_id", listId)
+    const cards = this.cardService.cards(ctx.userId).where("list_id", listId)
 
     if (listId === card.list_id) {
       if (sourceIndex < destinationIndex) {
@@ -96,7 +96,7 @@ export default class CardResolver {
       await Card.query().patch({ index: destinationIndex }).where("id", cardId)
       return true
     } else {
-      const sourceCards = this.cardService.cards(ctx.getUserId()).where("list_id", card.list_id)
+      const sourceCards = this.cardService.cards(ctx.userId).where("list_id", card.list_id)
       await sourceCards.patch({ index: raw("index - 1") }).where("index", ">", sourceIndex)
       await cards.patch({ index: raw("index + 1") }).where("index", ">=", destinationIndex)
       await Card.query().patch({ index: destinationIndex, list_id: listId }).where("id", cardId)
@@ -107,6 +107,6 @@ export default class CardResolver {
   @Authorized()
   @Query(() => Int)
   async nextIndex(@Arg("listId") listId: string, @Ctx() ctx: Context) {
-    return this.cardService.nextIndex(ctx.getUserId(), listId)
+    return this.cardService.nextIndex(ctx.userId, listId)
   }
 }

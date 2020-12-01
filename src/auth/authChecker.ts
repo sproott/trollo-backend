@@ -16,7 +16,7 @@ const customAuthChecker: AuthChecker<Context, Role> = async ({ context, root }, 
     if (!(root instanceof User)) {
       throw new Error("Auth error - root of owner is not User")
     }
-    if (root.id !== context.getUserId()) {
+    if (root.id !== context.userId) {
       return false
     }
   }

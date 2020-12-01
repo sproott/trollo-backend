@@ -22,7 +22,7 @@ export default class BoardResolver {
   @Authorized()
   @Query(() => Board)
   async board(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return this.boardService.getOwnBoardById(id, ctx.getUserId())
+    return this.boardService.getOwnBoardById(id, ctx.userId)
   }
 
   @Authorized()
@@ -33,7 +33,7 @@ export default class BoardResolver {
     @Ctx() ctx: Context
   ): Promise<CreateBoardResponse> {
     if (name.length == 0) throw new Error("Name is empty")
-    const team = await this.teamService.teams(ctx.getUserId(), true).findOne("team.id", teamId)
+    const team = await this.teamService.teams(ctx.userId, true).findOne("team.id", teamId)
 
     if (!team) return {}
 
@@ -51,6 +51,6 @@ export default class BoardResolver {
   @Authorized()
   @Mutation(() => Boolean, { nullable: true })
   async deleteBoard(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return (await this.boardService.getOwnBoardById(id, ctx.getUserId()).delete()) > 0
+    return (await this.boardService.getOwnBoardById(id, ctx.userId).delete()) > 0
   }
 }

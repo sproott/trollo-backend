@@ -19,7 +19,7 @@ export default class ListResolver {
     @Ctx() ctx: Context
   ) {
     if (name.length == 0) throw new Error("Name is empty")
-    const board = await this.boardService.board(ctx.getUserId(), boardId)
+    const board = await this.boardService.board(ctx.userId, boardId)
 
     if (!board) {
       throw new Error("Board doesn't exist")

@@ -37,4 +37,13 @@ export default class TeamResolver {
         .andWhere("team.id", id)) > 0
     )
   }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async renameTeam(@Arg("teamId") teamId: string, @Arg("name") name: string, @Ctx() ctx: Context) {
+    const affected = await Team.query()
+      .patch({ name })
+      .whereIn("id", this.teamService.ownTeam(ctx.getUserId(), teamId).select("team.id"))
+    return affected > 0
+  }
 }

@@ -2,6 +2,7 @@ import { Field, ID, Int, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import List from "../list/list.model"
+import { MaxLength } from "class-validator"
 
 @ObjectType()
 export default class Card extends Model {
@@ -13,9 +14,10 @@ export default class Card extends Model {
   id: string
 
   @Field()
+  @MaxLength(50)
   name: string
 
-  @Field(type => Int)
+  @Field((type) => Int)
   index: number
 
   @UseMiddleware(AutoLoader())
@@ -30,9 +32,9 @@ export default class Card extends Model {
         modelClass: List,
         join: {
           from: "card.list_id",
-          to: "list.id"
-        }
-      }
+          to: "list.id",
+        },
+      },
     }
   }
 }

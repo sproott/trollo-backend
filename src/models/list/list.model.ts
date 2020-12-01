@@ -3,6 +3,7 @@ import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Card from "../card/card.model"
 import Board from "../board/board.model"
+import { MaxLength } from "class-validator"
 
 @ObjectType()
 export default class List extends Model {
@@ -14,9 +15,10 @@ export default class List extends Model {
   id: string
 
   @Field()
+  @MaxLength(50)
   name: string
 
-  @UseMiddleware(AutoLoader({ customCondition: qb => qb.orderBy("card.index") }))
+  @UseMiddleware(AutoLoader({ customCondition: (qb) => qb.orderBy("card.index") }))
   @Field(() => [Card])
   cards: Card[]
 
@@ -40,9 +42,9 @@ export default class List extends Model {
         modelClass: Board,
         join: {
           from: "list.board_id",
-          to: "board.id"
-        }
-      }
+          to: "board.id",
+        },
+      },
     }
   }
 }

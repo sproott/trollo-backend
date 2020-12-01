@@ -1,8 +1,9 @@
-import {Authorized, Field, ID, ObjectType, UseMiddleware} from "type-graphql"
+import { Authorized, Field, ID, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import { Participant } from "../participant/participant.model"
-import Role from "../../auth/types/role";
+import Role from "../../auth/types/role"
+import { IsEmail, MaxLength } from "class-validator"
 
 @ObjectType()
 export default class User extends Model {
@@ -14,9 +15,11 @@ export default class User extends Model {
   id: string
 
   @Field()
+  @MaxLength(50)
   username: string
 
   @Field()
+  @IsEmail()
   email: string
 
   password: string

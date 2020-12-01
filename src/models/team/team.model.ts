@@ -3,6 +3,7 @@ import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Board from "../board/board.model"
 import { Participant } from "../participant/participant.model"
+import { MaxLength } from "class-validator"
 
 @ObjectType()
 export default class Team extends Model {
@@ -14,6 +15,7 @@ export default class Team extends Model {
   id: string
 
   @Field()
+  @MaxLength(50)
   name: string
 
   @UseMiddleware(AutoLoader())

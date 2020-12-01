@@ -15,4 +15,8 @@ export default class TeamService {
   team = (userId: string, teamId: string) => {
     return this.teams(userId).findById(teamId)
   }
+
+  ownTeam = (userId: string, teamId: string) => {
+    return this.ownTeams(userId).findById(teamId)
+  }
 }

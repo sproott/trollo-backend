@@ -1,10 +1,11 @@
 import { Field, InputType } from "type-graphql"
-import { IsEmail, Length, MaxLength } from "class-validator"
+import { IsEmail, IsNotEmpty, Length, MaxLength } from "class-validator"
 
 @InputType()
 export class RegisterInput {
   @Field()
-  @Length(1, 20)
+  @IsNotEmpty()
+  @MaxLength(20)
   username: string
 
   @Field()

@@ -32,6 +32,7 @@ export default class BoardResolver {
     @Arg("name") name: string,
     @Ctx() ctx: Context
   ): Promise<CreateBoardResponse> {
+    if (name.length == 0) throw new Error("Name is empty")
     const team = await this.teamService.teams(ctx.getUserId(), true).findOne("team.id", teamId)
 
     if (!team) return {}

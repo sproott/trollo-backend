@@ -18,6 +18,7 @@ export default class ListResolver {
     @Arg("boardId") boardId: string,
     @Ctx() ctx: Context
   ) {
+    if (name.length == 0) throw new Error("Name is empty")
     const board = await this.boardService.board(ctx.getUserId(), boardId)
 
     if (!board) {

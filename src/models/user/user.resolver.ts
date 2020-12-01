@@ -78,6 +78,7 @@ export default class UserResolver {
   @Authorized(Role.APP_ADMIN)
   @Mutation(() => Boolean)
   async makeAdmin(@Arg("username") username: string) {
+    if (username.length == 0) throw new Error("Name is empty")
     const numUpdated = await this.userService.findByUsername(username).patch({
       is_admin: true,
     })

@@ -15,6 +15,7 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => CreateTeamResponse)
   async createTeam(@Arg("name") name: string, @Ctx() ctx: Context): Promise<CreateTeamResponse> {
+    if (name.length == 0) throw new Error("Name is empty")
     const existingTeam = await this.teamService
       .ownTeams(ctx.getUserId())
       .findOne(raw('LOWER("team"."name")'), name.toLowerCase())
@@ -41,6 +42,7 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async renameTeam(@Arg("teamId") teamId: string, @Arg("name") name: string, @Ctx() ctx: Context) {
+    if (name.length == 0) throw new Error("Name is empty")
     const affected = await Team.query()
       .patch({ name })
       .whereIn("id", this.teamService.ownTeam(ctx.getUserId(), teamId).select("team.id"))

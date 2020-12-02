@@ -18,7 +18,11 @@ export default class CardResolver {
 
   @Authorized()
   @Mutation(() => CreateCardResponse)
-  async createCard(@Arg("name") name: string, @Arg("listId") listId: string, @Ctx() ctx: Context) {
+  async createCard(
+    @Arg("name") name: string,
+    @Arg("listId") listId: string,
+    @Ctx() ctx: Context
+  ): Promise<CreateCardResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const list = await this.listService.list(ctx.userId, listId)
 
@@ -60,9 +64,7 @@ export default class CardResolver {
       listId = card.list_id
     } else if (
       listId !== card.list_id &&
-      !(await this.listService
-        .list(ctx.userId, listId)
-        .where("list.board_id", card.list.board_id))
+      !(await this.listService.list(ctx.userId, listId).where("list.board_id", card.list.board_id))
     ) {
       return false
     }

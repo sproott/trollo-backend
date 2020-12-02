@@ -22,7 +22,7 @@ export default class BoardResolver {
   @Authorized()
   @Query(() => Board)
   async board(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return this.boardService.getOwnBoardById(id, ctx.userId)
+    return this.boardService.getBoardById(id, ctx.userId)
   }
 
   @Authorized()

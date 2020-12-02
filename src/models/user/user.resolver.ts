@@ -46,7 +46,10 @@ export default class UserResolver {
   }
 
   @Mutation(() => RegisterResponse)
-  async register(@Arg("input") input: RegisterInput, @Ctx() ctx: Context) {
+  async register(
+    @Arg("input") input: RegisterInput,
+    @Ctx() ctx: Context
+  ): Promise<RegisterResponse> {
     const error: RegisterError = new RegisterError()
     const response = new RegisterResponse()
     let throwError = false

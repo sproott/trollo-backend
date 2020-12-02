@@ -17,7 +17,7 @@ export default class ListResolver {
     @Arg("name") name: string,
     @Arg("boardId") boardId: string,
     @Ctx() ctx: Context
-  ) {
+  ): Promise<CreateListResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const board = await this.boardService.board(ctx.userId, boardId)
 

@@ -8,8 +8,12 @@ export default class CardService {
   private listService: ListService
 
   nextIndex = async (userId: string, listId: string): Promise<number> => {
-    // @ts-ignore
-    return (await Card.query().whereIn("list_id", this.listService.list(userId, listId).select("list.id")).max("index"))[0]?.max + 1 || 0
+    const maxIndex = ((
+      await Card.query()
+        .whereIn("list_id", this.listService.list(userId, listId).select("list.id"))
+        .max("index")
+    )[0] as any).max
+    return !maxIndex ? 0 : maxIndex + 1
   }
 
   cards = (userId: string) => {

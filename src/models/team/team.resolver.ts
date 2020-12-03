@@ -87,7 +87,7 @@ export default class TeamResolver {
       return { alreadyInTeam: true }
     }
     await Participant.query().insert({ user_id: user.id, team_id: team.id, owner: false })
-    return { userId: user.id }
+    return { userId: user.id, username: user.username }
   }
 
   @Authorized()

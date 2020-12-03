@@ -6,6 +6,9 @@ export default class AddUserResponse {
   userId?: string
 
   @Field({ nullable: true })
+  username?: string
+
+  @Field({ nullable: true })
   alreadyInTeam?: boolean
 
   @Field({ nullable: true })

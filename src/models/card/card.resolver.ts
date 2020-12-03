@@ -36,7 +36,6 @@ export default class CardResolver {
         List.query().select("list.id").joinRelated("board").where("board.id", list.board_id)
       )
       .findOne(raw("LOWER(name)"), name.toLowerCase())
-      .debug()
     if (!!existingCard) {
       return { exists: true }
     }

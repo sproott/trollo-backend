@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
+import { Field, ID, Int, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Card from "../card/card.model"
@@ -18,7 +18,10 @@ export default class List extends Model {
   @MaxLength(50)
   name: string
 
-  @UseMiddleware(AutoLoader({ customCondition: (qb) => qb.orderBy("card.index") }))
+  @Field(() => Int)
+  index: number
+
+  @UseMiddleware(AutoLoader())
   @Field(() => [Card])
   cards: Card[]
 

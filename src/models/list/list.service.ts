@@ -14,4 +14,11 @@ export default class ListService {
   list = (userId: string, listId: string) => {
     return this.lists(userId).findById(listId)
   }
+
+  nextIndex = async (userId: string, boardId: string): Promise<number> => {
+    const maxIndex = ((await List.query()
+      .whereIn("list.board_id", this.boardService.board(userId, boardId).select("board.id"))
+      .max("index")) as any)[0].max
+    return !maxIndex ? 0 : maxIndex + 1
+  }
 }

@@ -17,7 +17,7 @@ export default class Card extends Model {
   @MaxLength(50)
   name: string
 
-  @Field((type) => Int)
+  @Field(() => Int)
   index: number
 
   @UseMiddleware(AutoLoader())

@@ -7,16 +7,12 @@ export default class BoardService {
   @Inject
   private teamService: TeamService
 
-  getBoardById = (boardId: string, userId: string) => {
-    return Board.query()
-      .findById(boardId)
-      .whereIn("team_id", this.teamService.teams(userId).select("team.id"))
+  ownBoards = (userId: string) => {
+    return Board.query().whereIn("team_id", this.teamService.ownTeams(userId).select("team.id"))
   }
 
-  getOwnBoardById = (boardId: string, userId: string) => {
-    return Board.query()
-      .findById(boardId)
-      .whereIn("team_id", this.teamService.ownTeams(userId).select("team.id"))
+  ownBoard = (userId: string, boardId: string) => {
+    return this.ownBoards(userId).findById(boardId)
   }
 
   boards = (userId: string) => {

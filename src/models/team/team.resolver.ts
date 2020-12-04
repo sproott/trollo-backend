@@ -6,9 +6,9 @@ import CreateTeamResponse from "./types/createTeam"
 import { Participant } from "../participant/participant.model"
 import TeamService from "./team.service"
 import { Inject } from "typescript-ioc"
-import RenameTeamResponse from "./types/renameTeam"
 import UserService from "../user/user.service"
 import AddUserResponse from "./types/addUser"
+import { RenameResponse } from "../../common/types/objectTypes"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -45,12 +45,12 @@ export default class TeamResolver {
   }
 
   @Authorized()
-  @Mutation(() => RenameTeamResponse)
+  @Mutation(() => RenameResponse)
   async renameTeam(
     @Arg("teamId") teamId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context
-  ): Promise<RenameTeamResponse> {
+  ): Promise<RenameResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const existingTeam = await this.teamService
       .ownTeams(ctx.userId)

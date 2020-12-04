@@ -1,7 +1,7 @@
 import { Field, ObjectType } from "type-graphql"
 
 @ObjectType()
-export default class RenameTeamResponse {
+export class RenameResponse {
   @Field({ nullable: true })
   success?: boolean
 

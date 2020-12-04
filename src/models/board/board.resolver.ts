@@ -1,4 +1,4 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql"
+import { Arg, Authorized, Ctx, FieldResolver, Mutation, Query, Resolver, Root } from "type-graphql"
 import Board from "./board.model"
 import Context from "../../common/types/context"
 import { raw } from "objection"
@@ -7,6 +7,8 @@ import UserService from "../user/user.service"
 import { Inject } from "typescript-ioc"
 import BoardService from "./board.service"
 import TeamService from "../team/team.service"
+import Team from "../team/team.model"
+import { RenameResponse } from "../../common/types/objectTypes"
 
 @Resolver(Board)
 export default class BoardResolver {
@@ -22,7 +24,7 @@ export default class BoardResolver {
   @Authorized()
   @Query(() => Board)
   async board(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return this.boardService.getBoardById(id, ctx.userId)
+    return this.boardService.board(ctx.userId, id)
   }
 
   @Authorized()
@@ -49,8 +51,35 @@ export default class BoardResolver {
   }
 
   @Authorized()
+  @Mutation(() => RenameResponse)
+  async renameBoard(
+    @Arg("boardId") boardId: string,
+    @Arg("name") name: string,
+    @Ctx() ctx: Context
+  ): Promise<RenameResponse> {
+    if (name.length == 0) throw new Error("Name is empty")
+    const board = await this.boardService.ownBoard(ctx.userId, boardId)
+    if (!board) throw new Error("Board does not exist")
+    const existingBoard = await this.boardService
+      .ownBoards(ctx.userId)
+      .where("board.team_id", board.team_id)
+      .findOne(raw("LOWER(board.name)"), name.toLowerCase())
+    if (!!existingBoard) {
+      if (existingBoard.id === boardId) return { success: true }
+      else return { exists: true }
+    }
+    const affected = await Board.query().patch({ name }).where("board.id", boardId)
+    return { success: affected > 0 }
+  }
+
+  @Authorized()
   @Mutation(() => Boolean, { nullable: true })
   async deleteBoard(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return (await this.boardService.getOwnBoardById(id, ctx.userId).delete()) > 0
+    return (await this.boardService.ownBoard(ctx.userId, id).delete()) > 0
+  }
+
+  @FieldResolver(() => Boolean)
+  async isOwn(@Root() board: Board, @Ctx() ctx: Context) {
+    return !!(await this.boardService.ownBoard(ctx.userId, board.id))
   }
 }

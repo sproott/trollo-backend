@@ -21,7 +21,7 @@ export default class List extends Model {
   @Field(() => Int)
   index: number
 
-  @UseMiddleware(AutoLoader())
+  @UseMiddleware(AutoLoader({ customCondition: (qb) => qb.orderBy("index") }))
   @Field(() => [Card])
   cards: Card[]
 

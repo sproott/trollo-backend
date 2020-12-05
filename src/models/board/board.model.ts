@@ -1,9 +1,8 @@
-import { Ctx, Field, FieldResolver, ID, ObjectType, Root, UseMiddleware } from "type-graphql"
+import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import List from "../list/list.model"
 import { MaxLength } from "class-validator"
-import Context from "../../common/types/context"
 
 @ObjectType()
 export default class Board extends Model {
@@ -18,7 +17,7 @@ export default class Board extends Model {
   @MaxLength(50)
   name: string
 
-  @UseMiddleware(AutoLoader())
+  @UseMiddleware(AutoLoader({ customCondition: (qb) => qb.orderBy("index") }))
   @Field(() => [List])
   lists: List[]
 

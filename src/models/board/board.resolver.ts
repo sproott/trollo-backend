@@ -7,7 +7,6 @@ import UserService from "../user/user.service"
 import { Inject } from "typescript-ioc"
 import BoardService from "./board.service"
 import TeamService from "../team/team.service"
-import Team from "../team/team.model"
 import { RenameResponse } from "../../common/types/objectTypes"
 
 @Resolver(Board)
@@ -73,7 +72,7 @@ export default class BoardResolver {
   }
 
   @Authorized()
-  @Mutation(() => Boolean, { nullable: true })
+  @Mutation(() => Boolean)
   async deleteBoard(@Arg("id") id: string, @Ctx() ctx: Context) {
     return (await this.boardService.ownBoard(ctx.userId, id).delete()) > 0
   }

@@ -1,7 +1,7 @@
 import Context from "../common/types/context"
 import { AuthChecker } from "type-graphql"
 import Role from "./types/role"
-import User from "../models/user/user.model";
+import User from "../models/user/user.model"
 
 const customAuthChecker: AuthChecker<Context, Role> = async ({ context, root }, roles: Role[]) => {
   if (context.isUnauthenticated()) return false

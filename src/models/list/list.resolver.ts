@@ -6,6 +6,7 @@ import BoardService from "../board/board.service"
 import CreateListResponse from "./types/createList"
 import { raw } from "objection"
 import ListService from "./list.service"
+import { RenameResponse } from "../../common/types/objectTypes"
 
 @Resolver(List)
 export default class ListResolver {
@@ -78,6 +79,42 @@ export default class ListResolver {
         .andWhere("index", ">=", destinationIndex)
     }
     await List.query().patch({ index: destinationIndex }).where("id", cardId)
+    return true
+  }
+
+  @Authorized()
+  @Mutation(() => RenameResponse)
+  async renameList(
+    @Arg("listId") listId: string,
+    @Arg("name") name: string,
+    @Ctx() ctx: Context
+  ): Promise<RenameResponse> {
+    if (name.length == 0) throw new Error("Name is empty")
+    const list = await this.listService.list(ctx.userId, listId)
+    if (!list) throw new Error("List does not exist")
+    const existingList = await this.listService
+      .lists(ctx.userId)
+      .where("list.board_id", list.board_id)
+      .findOne(raw("LOWER(list.name)"), name.toLowerCase())
+    if (!!existingList) {
+      if (existingList.id === listId) return { success: true }
+      else return { exists: true }
+    }
+    const affected = await List.query().patch({ name }).where("list.id", listId)
+    return { success: affected > 0 }
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async deleteList(@Arg("id") id: string, @Ctx() ctx: Context) {
+    const list = await this.listService.list(ctx.userId, id)
+    if (!list) return false
+    await this.listService.list(ctx.userId, id).delete()
+    await this.listService
+      .lists(ctx.userId)
+      .where("board_id", list.board_id)
+      .andWhere("index", ">", list.index)
+      .patch({ index: raw("index - 1") })
     return true
   }
 }

@@ -19,6 +19,6 @@ export default class ListService {
     const maxIndex = ((await List.query()
       .whereIn("list.board_id", this.boardService.board(userId, boardId).select("board.id"))
       .max("index")) as any)[0].max
-    return !maxIndex ? 0 : maxIndex + 1
+    return maxIndex === null ? 0 : maxIndex + 1
   }
 }

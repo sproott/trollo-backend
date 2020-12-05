@@ -7,6 +7,7 @@ import CardService from "./card.service"
 import { raw } from "objection"
 import List from "../list/list.model"
 import CreateCardResponse from "./types/createCard"
+import { RenameResponse } from "../../common/types/objectTypes"
 
 @Resolver(Card)
 export default class CardResolver {
@@ -109,5 +110,41 @@ export default class CardResolver {
   @Query(() => Int)
   async nextIndex(@Arg("listId") listId: string, @Ctx() ctx: Context) {
     return this.cardService.nextIndex(ctx.userId, listId)
+  }
+
+  @Authorized()
+  @Mutation(() => RenameResponse)
+  async renameCard(
+    @Arg("cardId") cardId: string,
+    @Arg("name") name: string,
+    @Ctx() ctx: Context
+  ): Promise<RenameResponse> {
+    if (name.length == 0) throw new Error("Name is empty")
+    const card = await this.cardService.card(ctx.userId, cardId)
+    if (!card) throw new Error("Card does not exist")
+    const existingCard = await this.cardService
+      .cards(ctx.userId)
+      .where("card.list_id", card.list_id)
+      .findOne(raw("LOWER(card.name)"), name.toLowerCase())
+    if (!!existingCard) {
+      if (existingCard.id === cardId) return { success: true }
+      else return { exists: true }
+    }
+    const affected = await Card.query().patch({ name }).where("card.id", cardId)
+    return { success: affected > 0 }
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async deleteCard(@Arg("id") id: string, @Ctx() ctx: Context) {
+    const card = await this.cardService.card(ctx.userId, id)
+    if (!card) return false
+    await this.cardService.card(ctx.userId, id).delete()
+    await this.cardService
+      .cards(ctx.userId)
+      .where("list_id", card.list_id)
+      .andWhere("index", ">", card.index)
+      .patch({ index: raw("index - 1") })
+    return true
   }
 }

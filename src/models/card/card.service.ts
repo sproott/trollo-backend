@@ -13,7 +13,7 @@ export default class CardService {
         .whereIn("list_id", this.listService.list(userId, listId).select("list.id"))
         .max("index")
     )[0] as any).max
-    return !maxIndex ? 0 : maxIndex + 1
+    return maxIndex === null ? 0 : maxIndex + 1
   }
 
   cards = (userId: string) => {

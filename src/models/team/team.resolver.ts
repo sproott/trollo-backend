@@ -34,7 +34,7 @@ export default class TeamResolver {
   }
 
   @Authorized()
-  @Mutation(() => Boolean, { nullable: true })
+  @Mutation(() => Boolean)
   async deleteTeam(@Arg("id") id: string, @Ctx() ctx: Context) {
     return (
       (await Team.query()

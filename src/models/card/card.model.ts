@@ -17,6 +17,10 @@ export default class Card extends Model {
   @MaxLength(50)
   name: string
 
+  @Field({ nullable: true })
+  @MaxLength(256)
+  description: string
+
   @Field(() => Int)
   index: number
 

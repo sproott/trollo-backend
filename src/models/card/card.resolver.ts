@@ -21,6 +21,7 @@ export default class CardResolver {
   @Mutation(() => CreateCardResponse)
   async createCard(
     @Arg("name") name: string,
+    @Arg("description", { nullable: true }) description: string,
     @Arg("listId") listId: string,
     @Ctx() ctx: Context
   ): Promise<CreateCardResponse> {
@@ -43,6 +44,7 @@ export default class CardResolver {
 
     const newCard = await Card.query().insert({
       name,
+      description,
       index: await this.cardService.nextIndex(ctx.userId, listId),
       list_id: listId,
     })
@@ -132,6 +134,21 @@ export default class CardResolver {
     }
     const affected = await Card.query().patch({ name }).where("card.id", cardId)
     return { success: affected > 0 }
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async updateCardDescription(
+    @Arg("cardId") cardId: string,
+    @Arg("description") description: string,
+    @Ctx() ctx: Context
+  ) {
+    if (description.length == 0) throw new Error("Description is empty")
+    return (
+      (await Card.query()
+        .patch({ description })
+        .whereIn("card.id", this.cardService.card(ctx.userId, cardId))) > 0
+    )
   }
 
   @Authorized()

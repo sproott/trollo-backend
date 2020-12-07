@@ -147,7 +147,7 @@ export default class CardResolver {
     return (
       (await Card.query()
         .patch({ description })
-        .whereIn("card.id", this.cardService.card(ctx.userId, cardId))) > 0
+        .where("card.id", this.cardService.card(ctx.userId, cardId).select("card.id"))) > 0
     )
   }
 

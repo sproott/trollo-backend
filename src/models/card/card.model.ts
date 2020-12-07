@@ -3,6 +3,7 @@ import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import List from "../list/list.model"
 import { MaxLength } from "class-validator"
+import User from "../user/user.model"
 
 @ObjectType()
 export default class Card extends Model {
@@ -25,6 +26,11 @@ export default class Card extends Model {
   index: number
 
   @UseMiddleware(AutoLoader())
+  @Field(() => User, { nullable: true })
+  assignee?: User
+  assignee_id: string
+
+  @UseMiddleware(AutoLoader())
   @Field(() => List)
   list: List
   list_id: string
@@ -37,6 +43,14 @@ export default class Card extends Model {
         join: {
           from: "card.list_id",
           to: "list.id",
+        },
+      },
+      assignee: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "card.assignee_id",
+          to: "user.id",
         },
       },
     }

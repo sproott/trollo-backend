@@ -3,6 +3,7 @@ import { Model, RelationMappings } from "objection"
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import List from "../list/list.model"
 import { MaxLength } from "class-validator"
+import Team from "../team/team.model"
 
 @ObjectType()
 export default class Board extends Model {
@@ -21,6 +22,9 @@ export default class Board extends Model {
   @Field(() => [List])
   lists: List[]
 
+  @UseMiddleware(AutoLoader())
+  @Field(() => Team)
+  team: Team
   team_id: string
 
   static get relationMappings(): RelationMappings {
@@ -31,6 +35,14 @@ export default class Board extends Model {
         join: {
           from: "board.id",
           to: "list.board_id",
+        },
+      },
+      team: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Team,
+        join: {
+          from: "board.team_id",
+          to: "team.id",
         },
       },
     }

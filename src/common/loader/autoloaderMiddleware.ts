@@ -50,5 +50,10 @@ export const AutoLoader = (params?: {
     throw new Error("Unsupported: AutoLoad given an unknown relation.")
   }
   // @ts-ignore
-  return loader.load(root[getColumnName(field.join.from)], params?.customCondition)
+  const id = root[getColumnName(field.join.from)]
+  if (id === null) {
+    return null
+  } else {
+    return loader.load(id, params?.customCondition)
+  }
 }

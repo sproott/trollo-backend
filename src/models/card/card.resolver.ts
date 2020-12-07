@@ -8,6 +8,7 @@ import { raw } from "objection"
 import List from "../list/list.model"
 import CreateCardResponse from "./types/createCard"
 import { RenameResponse } from "../../common/types/objectTypes"
+import { Participant } from "../participant/participant.model"
 
 @Resolver(Card)
 export default class CardResolver {
@@ -162,6 +163,44 @@ export default class CardResolver {
       .where("list_id", card.list_id)
       .andWhere("index", ">", card.index)
       .patch({ index: raw("index - 1") })
+    return true
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async assignUser(
+    @Arg("cardId") cardId: string,
+    @Arg("userId") userId: string,
+    @Ctx() ctx: Context
+  ) {
+    const card = await this.cardService.card(ctx.userId, cardId)
+    if (!card) {
+      throw new Error("Card does not exist")
+    }
+    const teamId = ((
+      await Card.query()
+        .for(card.id)
+        .joinRelated("list.[board.[team]]")
+        .select("list:board:team.id")
+    )[0] as any).id as string
+    const participant = await Participant.query()
+      .findOne("user_id", userId)
+      .andWhere("team_id", teamId)
+    if (!participant) {
+      throw new Error("User is not in team")
+    }
+    await Card.query().patch({ assignee_id: userId }).where("card.id", cardId)
+    return true
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async unassignUser(@Arg("cardId") cardId: string, @Ctx() ctx: Context) {
+    const card = await this.cardService.card(ctx.userId, cardId)
+    if (!card) {
+      throw new Error("Card does not exist")
+    }
+    await Card.query().patch({ assignee_id: null }).where("card.id", cardId)
     return true
   }
 }

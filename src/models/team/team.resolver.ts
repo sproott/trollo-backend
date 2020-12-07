@@ -9,6 +9,8 @@ import { Inject } from "typescript-ioc"
 import UserService from "../user/user.service"
 import AddUserResponse from "./types/addUser"
 import { RenameResponse } from "../../common/types/objectTypes"
+import Card from "../card/card.model"
+import CardService from "../card/card.service"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -16,6 +18,8 @@ export default class TeamResolver {
   private teamService: TeamService
   @Inject
   private userService: UserService
+  @Inject
+  private cardService: CardService
 
   @Authorized()
   @Mutation(() => CreateTeamResponse)
@@ -102,6 +106,13 @@ export default class TeamResolver {
     if (userId === ctx.userId) {
       throw new Error("Cannot remove self")
     }
+    await Card.query()
+      .patch({ assignee_id: null })
+      .whereIn(
+        "card.id",
+        team.$relatedQuery("boards.[lists.[cards]]]").select("boards:lists:cards.id")
+      )
+      .where("card.assignee_id", userId)
     const affected = await Participant.query()
       .delete()
       .where("user_id", userId)

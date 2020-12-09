@@ -3,10 +3,12 @@ import {
   Arg,
   Authorized,
   Ctx,
+  Int,
   Mutation,
   Publisher,
   PubSub,
   Resolver,
+  ResolverFilterData,
   Root,
   Subscription,
 } from "type-graphql"
@@ -22,6 +24,7 @@ import { RenameResponse } from "../../common/types/objectTypes"
 import CardService from "../card/card.service"
 import Notification from "../../common/types/notification"
 import teamFilter from "./team.filter"
+import { TeamDeletedPayload } from "./types/teamDeleted"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -50,13 +53,36 @@ export default class TeamResolver {
 
   @Authorized()
   @Mutation(() => Boolean)
-  async deleteTeam(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return (
-      (await Team.query()
-        .delete()
-        .whereIn("team.id", this.teamService.ownTeams(ctx.userId).select("team.id"))
-        .andWhere("team.id", id)) > 0
+  async deleteTeam(
+    @Arg("id") id: string,
+    @Ctx() ctx: Context,
+    @PubSub(Notification.TEAM_DELETED) publish: Publisher<TeamDeletedPayload>
+  ) {
+    const participantIds = (await Participant.query().where("team_id", id).select("user_id")).map(
+      (p) => p.user_id
     )
+    const affected = await Team.query()
+      .delete()
+      .whereIn("team.id", this.teamService.ownTeams(ctx.userId).select("team.id"))
+      .andWhere("team.id", id)
+    if (affected > 0) {
+      await publish({
+        teamId: id,
+        participantIds,
+      })
+      return true
+    }
+    return false
+  }
+
+  @Authorized()
+  @Subscription(() => String, {
+    topics: Notification.TEAM_DELETED,
+    filter: ({ context, payload }: ResolverFilterData<TeamDeletedPayload, any, Context>) =>
+      !!payload.participantIds.find((id) => id === context.userId),
+  })
+  async teamDeleted(@Root() payload: TeamDeletedPayload) {
+    return payload.teamId
   }
 
   @Authorized()

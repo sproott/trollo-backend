@@ -21,6 +21,7 @@ import AddUserResponse from "./types/addUser"
 import { RenameResponse } from "../../common/types/objectTypes"
 import CardService from "../card/card.service"
 import Notification from "../../common/types/notification"
+import teamFilter from "./team.filter"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -85,7 +86,10 @@ export default class TeamResolver {
   }
 
   @Authorized()
-  @Subscription(() => Team, { topics: Notification.TEAM_RENAMED })
+  @Subscription(() => Team, {
+    topics: Notification.TEAM_RENAMED,
+    filter: teamFilter,
+  })
   async teamRenamed(@Root() team: Team) {
     return team
   }

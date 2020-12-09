@@ -5,8 +5,14 @@ import LoaderContainer from "../common/loader/loaderContainer"
 import UserWrapper from "../models/user/userWrapper"
 import { LoginInput } from "../models/user/user.input"
 import Context from "../common/types/context"
+import { ExecutionParams } from "graphql-tools"
 
-export default function buildContext(req: express.Request, res: express.Response): Context {
+export default function buildContext(
+  _req: express.Request,
+  res: express.Response,
+  connection: ExecutionParams<any> | undefined
+): Context {
+  const req = !!connection ? connection.context.req : _req
   return {
     isAuthenticated: () => req.isAuthenticated(),
     isUnauthenticated: () => req.isUnauthenticated(),

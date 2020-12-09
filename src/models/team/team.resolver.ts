@@ -1,5 +1,15 @@
 import Team from "./team.model"
-import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql"
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  Mutation,
+  Publisher,
+  PubSub,
+  Resolver,
+  Root,
+  Subscription,
+} from "type-graphql"
 import Context from "../../common/types/context"
 import { raw } from "objection"
 import CreateTeamResponse from "./types/createTeam"
@@ -10,6 +20,7 @@ import UserService from "../user/user.service"
 import AddUserResponse from "./types/addUser"
 import { RenameResponse } from "../../common/types/objectTypes"
 import CardService from "../card/card.service"
+import Notification from "../../common/types/notification"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -52,7 +63,8 @@ export default class TeamResolver {
   async renameTeam(
     @Arg("teamId") teamId: string,
     @Arg("name") name: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.TEAM_RENAMED) publish: Publisher<Team>
   ): Promise<RenameResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const existingTeam = await this.teamService
@@ -62,10 +74,20 @@ export default class TeamResolver {
       if (existingTeam.id === teamId) return { success: true }
       else return { exists: true }
     }
-    const affected = await Team.query()
-      .patch({ name })
-      .whereIn("id", this.teamService.ownTeam(ctx.userId, teamId).select("team.id"))
-    return { success: affected > 0 }
+    const affectedTeam = (
+      await Team.query()
+        .patch({ name })
+        .whereIn("id", this.teamService.ownTeam(ctx.userId, teamId).select("team.id"))
+        .returning("team.*")
+    )[0]
+    await publish(affectedTeam)
+    return { success: !!affectedTeam }
+  }
+
+  @Authorized()
+  @Subscription(() => Team, { topics: Notification.TEAM_RENAMED })
+  async teamRenamed(@Root() team: Team) {
+    return team
   }
 
   @Authorized()

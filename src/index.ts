@@ -10,6 +10,7 @@ import initPassport from "./init/initPassport"
 import getApolloConfig from "./init/apolloConfig"
 import { isProduction, sleep } from "./common/lib/util"
 import ON_DEATH from "death"
+import * as http from "http"
 
 const KnexSessionStore = require("connect-session-knex")(session)
 
@@ -29,11 +30,6 @@ async function init() {
     tablename: "sessions",
   })
 
-  // init Apollo
-  const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.*")
-
-  apolloServer = new ApolloServer(apolloConfig)
-
   // init Passport
   initPassport()
 
@@ -41,28 +37,38 @@ async function init() {
   const app = express()
 
   // for cookies in deployment
-  isProduction() && app.set('trust proxy', 1)
+  isProduction() && app.set("trust proxy", 1)
 
   // add session capability to app
-  app.use(
-    session({
-      genid: (req) => uuid(),
-      secret: process.env.SESSION_SECRET ?? "y-L%@V!*s=A6R4Bv",
-      resave: false,
-      saveUninitialized: false,
-      store,
-      cookie: {
-        httpOnly: true,
-        secure: isProduction(),
-        sameSite: isProduction() ? "none" : undefined,
-        maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
-      },
-    })
-  )
+  const sessionMiddleware = session({
+    genid: (req) => uuid(),
+    secret: process.env.SESSION_SECRET ?? "y-L%@V!*s=A6R4Bv",
+    resave: false,
+    saveUninitialized: false,
+    store,
+    cookie: {
+      httpOnly: true,
+      secure: isProduction(),
+      sameSite: isProduction() ? "none" : undefined,
+      maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
+    },
+  })
+  app.use(sessionMiddleware)
 
   // add Passport to app
-  app.use(passport.initialize())
-  app.use(passport.session())
+  const passportMiddleware = passport.initialize()
+  const passportSessionMiddleware = passport.session()
+  app.use(passportMiddleware)
+  app.use(passportSessionMiddleware)
+
+  // init Apollo
+  const apolloConfig = await getApolloConfig(__dirname + "/**/*.resolver.*", [
+    sessionMiddleware,
+    passportMiddleware,
+    passportSessionMiddleware,
+  ])
+
+  apolloServer = new ApolloServer(apolloConfig)
 
   // connect Apollo with Express
   apolloServer.applyMiddleware({
@@ -73,12 +79,19 @@ async function init() {
     },
   })
 
+  const httpServer = http.createServer(app)
+  apolloServer.installSubscriptionHandlers(httpServer)
+
   const port = +(process.env.PORT ?? 4000)
 
   // start GraphQL server
   return new Promise((resolve, rejects) => {
-    server = app.listen(port, isProduction() ? "0.0.0.0" : "localhost", () => {
-      console.info(`GraphQL server ready at ${process.env.API_BASE_PATH ?? "http://localhost:" + port}${apolloServer.graphqlPath}`)
+    server = httpServer.listen(port, isProduction() ? "0.0.0.0" : "localhost", () => {
+      console.info(
+        `GraphQL server ready at ${process.env.API_BASE_PATH ?? "http://localhost:" + port}${
+          apolloServer.graphqlPath
+        }`
+      )
       resolve(undefined)
     })
   })
@@ -119,8 +132,7 @@ const gracefullyShutDown = (signal: string) => {
   )
 
   return new Promise((resolve) => {
-    !!apolloServer ? apolloServer
-      .stop() : resolve(undefined)
+    !!apolloServer ? apolloServer.stop() : resolve(undefined)
   })
     .then(() => {
       console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)

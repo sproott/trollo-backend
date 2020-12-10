@@ -196,10 +196,18 @@ export default class TeamResolver {
 
   @Authorized()
   @Mutation(() => Boolean)
-  async leaveTeam(@Arg("teamId") teamId: string, @Ctx() ctx: Context) {
+  async leaveTeam(
+    @Arg("teamId") teamId: string,
+    @Ctx() ctx: Context,
+    @PubSub(Notification.TEAM_USER_REMOVED) publish: Publisher<TeamUserRemovedPayload>
+  ) {
     const team = await this.teamService.teams(ctx.userId, false).findById(teamId)
     if (!team) throw new Error("Team not found")
     const affected = await this.teamService.removeUser(team, ctx.userId)
-    return affected > 0
+    if (affected > 0) {
+      await publish({ teamId, userId: ctx.userId })
+      return true
+    }
+    return false
   }
 }

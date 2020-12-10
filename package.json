@@ -21,7 +21,6 @@
     "bcrypt": "^5.0.0",
     "class-validator": "^0.12.2",
     "connect-session-knex": "^2.0.0",
-    "cors": "^2.8.5",
     "dataloader": "^2.0.0",
     "death": "^1.1.0",
     "express": "^4.17.1",

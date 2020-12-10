@@ -11,7 +11,6 @@ import getApolloConfig from "./init/apolloConfig"
 import { isProduction, sleep } from "./common/lib/util"
 import ON_DEATH from "death"
 import * as http from "http"
-import cors from "cors"
 
 const KnexSessionStore = require("connect-session-knex")(session)
 
@@ -36,13 +35,6 @@ async function init() {
 
   // create Express app
   const app = express()
-
-  // set up cors
-  const corsMiddleware = cors({
-    credentials: true,
-    origin: ["http://localhost:3000", "https://trollo-frontend.vercel.app"],
-  })
-  app.use(corsMiddleware)
 
   // for cookies in deployment
   isProduction() && app.set("trust proxy", 1)
@@ -81,7 +73,10 @@ async function init() {
   // connect Apollo with Express
   apolloServer.applyMiddleware({
     app,
-    cors: false,
+    cors: {
+      credentials: true,
+      origin: ["http://localhost:3000", "https://trollo-frontend.vercel.app"],
+    },
   })
 
   const httpServer = http.createServer(app)

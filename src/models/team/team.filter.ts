@@ -1,12 +1,11 @@
-import FilterFunc from "../../common/types/filterFunc"
-import Team from "./team.model"
 import TeamService from "./team.service"
 import { Container } from "typescript-ioc"
+import { FilterFuncInner } from "../../common/lib/filterFunc"
 
 const teamService = Container.get(TeamService)
 
-const teamFilter: FilterFunc<Team> = async ({ context, payload }) => {
-  return !!(await teamService.team(context.userId, payload.id))
+const teamParticipantFilter: FilterFuncInner<string> = async ({ context, payload }) => {
+  return !!(await teamService.team(context.userId, payload))
 }
 
-export default teamFilter
+export default teamParticipantFilter

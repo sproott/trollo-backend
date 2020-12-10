@@ -1,6 +1,8 @@
 enum Notification {
   TEAM_DELETED = "TEAM_DELETED",
   TEAM_RENAMED = "TEAM_RENAMED",
+  TEAM_USER_ADDED = "TEAM_USER_ADDED",
+  TEAM_USER_REMOVED = "TEAM_USER_REMOVED",
 }
 
 export default Notification

@@ -22,8 +22,13 @@ import AddUserResponse from "./types/addUser"
 import { RenameResponse } from "../../common/types/objectTypes"
 import CardService from "../card/card.service"
 import Notification from "../../common/types/notification"
-import teamFilter from "./team.filter"
-import { TeamDeletedPayload } from "./types/teamDeleted"
+import {
+  TeamDeletedPayload,
+  TeamUserAddedPayload,
+  TeamUserRemovedPayload,
+} from "./types/subscriptionPayloads"
+import teamParticipantFilter from "./team.filter"
+import { filterFunc } from "../../common/lib/filterFunc"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -80,7 +85,7 @@ export default class TeamResolver {
     filter: ({ context, payload }: ResolverFilterData<TeamDeletedPayload, any, Context>) =>
       !!payload.participantIds.find((id) => id === context.userId),
   })
-  async teamDeleted(@Root() payload: TeamDeletedPayload) {
+  teamDeleted(@Root() payload: TeamDeletedPayload) {
     return payload.teamId
   }
 
@@ -113,9 +118,9 @@ export default class TeamResolver {
   @Authorized()
   @Subscription(() => Team, {
     topics: Notification.TEAM_RENAMED,
-    filter: teamFilter,
+    filter: filterFunc((team: Team) => team.id, teamParticipantFilter),
   })
-  async teamRenamed(@Root() team: Team) {
+  teamRenamed(@Root() team: Team) {
     return team
   }
 
@@ -124,7 +129,8 @@ export default class TeamResolver {
   async addUser(
     @Arg("teamId") teamId: string,
     @Arg("username") username: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.TEAM_USER_ADDED) publish: Publisher<TeamUserAddedPayload>
   ): Promise<AddUserResponse> {
     if (username.length === 0) throw new Error("Username is empty")
     const team = await this.teamService.ownTeam(ctx.userId, teamId)
@@ -141,7 +147,17 @@ export default class TeamResolver {
       return { alreadyInTeam: true }
     }
     await Participant.query().insert({ user_id: user.id, team_id: team.id, owner: false })
+    await publish({ team, user })
     return { userId: user.id, username: user.username }
+  }
+
+  @Authorized()
+  @Subscription(() => TeamUserAddedPayload, {
+    topics: Notification.TEAM_USER_ADDED,
+    filter: filterFunc((payload: TeamUserAddedPayload) => payload.team.id, teamParticipantFilter),
+  })
+  teamUserAdded(@Root() payload: TeamUserAddedPayload) {
+    return payload
   }
 
   @Authorized()
@@ -149,7 +165,8 @@ export default class TeamResolver {
   async removeUser(
     @Arg("userId") userId: string,
     @Arg("teamId") teamId: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.TEAM_USER_REMOVED) publish: Publisher<TeamUserRemovedPayload>
   ) {
     const team = await this.teamService.ownTeam(ctx.userId, teamId)
     if (!team) throw new Error("Team not found")
@@ -157,7 +174,24 @@ export default class TeamResolver {
       throw new Error("Cannot remove self")
     }
     const affected = await this.teamService.removeUser(team, userId)
-    return affected > 0
+    if (affected > 0) {
+      await publish({ teamId, userId })
+      return true
+    }
+    return false
+  }
+
+  @Authorized()
+  @Subscription(() => TeamUserRemovedPayload, {
+    topics: Notification.TEAM_USER_REMOVED,
+    filter: filterFunc(
+      (payload: TeamUserRemovedPayload) => payload.teamId,
+      teamParticipantFilter,
+      ({ payload, context }) => payload.userId === context.userId
+    ),
+  })
+  teamUserRemoved(@Root() payload: TeamUserRemovedPayload) {
+    return payload
   }
 
   @Authorized()

@@ -52,7 +52,8 @@ export const AutoLoader = (params?: {
   // @ts-ignore
   const id = root[getColumnName(field.join.from)]
   if (id === null) {
-    return null
+    if (field.relation === Model.HasManyRelation) return []
+    else return null
   } else {
     return loader.load(id, params?.customCondition)
   }

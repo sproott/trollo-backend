@@ -3,7 +3,6 @@ import {
   Arg,
   Authorized,
   Ctx,
-  Int,
   Mutation,
   Publisher,
   PubSub,

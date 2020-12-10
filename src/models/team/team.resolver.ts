@@ -7,7 +7,6 @@ import {
   Publisher,
   PubSub,
   Resolver,
-  ResolverFilterData,
   Root,
   Subscription,
 } from "type-graphql"
@@ -28,7 +27,7 @@ import {
   TeamUserRemovedPayload,
 } from "./types/subscriptionPayloads"
 import teamParticipantFilter from "./team.filter"
-import { filterFunc } from "../../common/lib/filterFunc"
+import { filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -82,7 +81,7 @@ export default class TeamResolver {
   @Authorized()
   @Subscription(() => String, {
     topics: Notification.TEAM_DELETED,
-    filter: ({ context, payload }: ResolverFilterData<TeamDeletedPayload, any, Context>) =>
+    filter: ({ context, payload }: FilterFuncData<TeamDeletedPayload>) =>
       !!payload.participantIds.find((id) => id === context.userId),
   })
   teamDeleted(@Root() payload: TeamDeletedPayload) {
@@ -111,8 +110,11 @@ export default class TeamResolver {
         .whereIn("id", this.teamService.ownTeam(ctx.userId, teamId).select("team.id"))
         .returning("team.*")
     )[0]
-    await publish(affectedTeam)
-    return { success: !!affectedTeam }
+    if (affectedTeam) {
+      await publish(affectedTeam)
+      return { success: true }
+    }
+    return { success: false }
   }
 
   @Authorized()

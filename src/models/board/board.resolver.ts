@@ -1,4 +1,16 @@
-import { Arg, Authorized, Ctx, FieldResolver, Mutation, Query, Resolver, Root } from "type-graphql"
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Publisher,
+  PubSub,
+  Query,
+  Resolver,
+  Root,
+  Subscription,
+} from "type-graphql"
 import Board from "./board.model"
 import Context from "../../common/types/context"
 import { raw } from "objection"
@@ -8,6 +20,12 @@ import { Inject } from "typescript-ioc"
 import BoardService from "./board.service"
 import TeamService from "../team/team.service"
 import { RenameResponse } from "../../common/types/objectTypes"
+import Notification from "../../common/types/notification"
+import { filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
+import boardFilter from "./board.filter"
+import { BoardCreatedPayload, BoardDeletedPayload } from "./types/subscriptionPayloads"
+import teamParticipantFilter from "../team/team.filter"
+import { Participant } from "../participant/participant.model"
 
 @Resolver(Board)
 export default class BoardResolver {
@@ -31,7 +49,8 @@ export default class BoardResolver {
   async createBoard(
     @Arg("teamId") teamId: string,
     @Arg("name") name: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.BOARD_CREATED) publish: Publisher<BoardCreatedPayload>
   ): Promise<CreateBoardResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const team = await this.teamService.teams(ctx.userId, true).findOne("team.id", teamId)
@@ -46,7 +65,17 @@ export default class BoardResolver {
     }
 
     const newBoard = await team.$relatedQuery("boards").insert({ name })
+    await publish({ board: newBoard, teamId })
     return { board: newBoard }
+  }
+
+  @Authorized()
+  @Subscription(() => BoardCreatedPayload, {
+    topics: Notification.BOARD_CREATED,
+    filter: filterFunc((payload: BoardCreatedPayload) => payload.teamId, teamParticipantFilter),
+  })
+  async boardCreated(@Root() payload: BoardCreatedPayload) {
+    return payload
   }
 
   @Authorized()
@@ -54,7 +83,8 @@ export default class BoardResolver {
   async renameBoard(
     @Arg("boardId") boardId: string,
     @Arg("name") name: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.BOARD_RENAMED) publish: Publisher<Board>
   ): Promise<RenameResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const board = await this.boardService.ownBoard(ctx.userId, boardId)
@@ -67,14 +97,50 @@ export default class BoardResolver {
       if (existingBoard.id === boardId) return { success: true }
       else return { exists: true }
     }
-    const affected = await Board.query().patch({ name }).where("board.id", boardId)
-    return { success: affected > 0 }
+    const affectedBoard = (
+      await Board.query().patch({ name }).where("board.id", boardId).returning("board.*")
+    )[0]
+    if (!!affectedBoard) {
+      await publish(affectedBoard)
+      return { success: true }
+    }
+    return { success: false }
+  }
+
+  @Authorized()
+  @Subscription(() => Board, {
+    topics: Notification.BOARD_RENAMED,
+    filter: filterFunc((board: Board) => board.id, boardFilter),
+  })
+  async boardRenamed(@Root() payload: Board) {
+    return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
-  async deleteBoard(@Arg("id") id: string, @Ctx() ctx: Context) {
-    return (await this.boardService.ownBoard(ctx.userId, id).delete()) > 0
+  async deleteBoard(
+    @Arg("id") id: string,
+    @Ctx() ctx: Context,
+    @PubSub(Notification.BOARD_DELETED) publish: Publisher<BoardDeletedPayload>
+  ) {
+    const board = await this.boardService.ownBoard(ctx.userId, id)
+    if (!board) throw new Error("Board does not exist")
+    const participantIds = (
+      await Participant.query().where("team_id", board.team_id).select("user_id")
+    ).map((p) => p.user_id)
+    await Board.query().deleteById(id)
+    await publish({ boardId: id, participantIds })
+    return true
+  }
+
+  @Authorized()
+  @Subscription(() => String, {
+    topics: Notification.BOARD_DELETED,
+    filter: ({ context, payload }: FilterFuncData<BoardDeletedPayload>) =>
+      !!payload.participantIds.find((id) => id === context.userId),
+  })
+  async boardDeleted(@Root() payload: BoardDeletedPayload) {
+    return payload.boardId
   }
 
   @FieldResolver(() => Boolean)

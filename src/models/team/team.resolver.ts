@@ -189,7 +189,7 @@ export default class TeamResolver {
     filter: filterFunc(
       (payload: TeamUserRemovedPayload) => payload.teamId,
       teamParticipantFilter,
-      ({ payload, context }) => payload.userId === context.userId
+      ({ payload, context, filterResult }) => filterResult || payload.userId === context.userId
     ),
   })
   teamUserRemoved(@Root() payload: TeamUserRemovedPayload) {

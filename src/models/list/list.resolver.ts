@@ -1,4 +1,15 @@
-import { Arg, Authorized, Ctx, Int, Mutation, Resolver } from "type-graphql"
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  Int,
+  Mutation,
+  Publisher,
+  PubSub,
+  Resolver,
+  Root,
+  Subscription,
+} from "type-graphql"
 import List from "./list.model"
 import { Inject } from "typescript-ioc"
 import Context from "../../common/types/context"
@@ -7,6 +18,11 @@ import CreateListResponse from "./types/createList"
 import { raw } from "objection"
 import ListService from "./list.service"
 import { RenameResponse } from "../../common/types/objectTypes"
+import Notification from "../../common/types/notification"
+import { ListDeletedPayload, ListMovedPayload } from "./types/subscriptionPayloads"
+import Role from "../../auth/types/role"
+import { boardIdFilter } from "../board/board.filter"
+import { filterFunc } from "../../common/lib/filterFunc"
 
 @Resolver(List)
 export default class ListResolver {
@@ -20,7 +36,8 @@ export default class ListResolver {
   async createList(
     @Arg("name") name: string,
     @Arg("boardId") boardId: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.LIST_CREATED) publish: Publisher<List>
   ): Promise<CreateListResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const board = await this.boardService.board(ctx.userId, boardId)
@@ -41,17 +58,28 @@ export default class ListResolver {
       board_id: boardId,
       index: await this.listService.nextIndex(ctx.userId, boardId),
     })
+    await publish(newList)
     return { list: newList }
+  }
+
+  @Authorized([Role.BOARD])
+  @Subscription(() => List, {
+    topics: Notification.LIST_CREATED,
+    filter: boardIdFilter,
+  })
+  async listCreated(@Arg("boardId") boardId: string, @Root() payload: List) {
+    return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async moveList(
-    @Arg("listId") cardId: string,
+    @Arg("listId") listId: string,
     @Arg("destinationIndex", () => Int) destinationIndex: number,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.LIST_MOVED) publish: Publisher<ListMovedPayload>
   ) {
-    const list = await this.listService.list(ctx.userId, cardId)
+    const list = await this.listService.list(ctx.userId, listId)
     if (!list) throw new Error("List doesn't exist")
 
     const nextIndex = await this.listService.nextIndex(ctx.userId, list.board_id)
@@ -78,8 +106,20 @@ export default class ListResolver {
         .where("index", "<", sourceIndex)
         .andWhere("index", ">=", destinationIndex)
     }
-    await List.query().patch({ index: destinationIndex }).where("id", cardId)
+    const affectedList = (
+      await List.query().patch({ index: destinationIndex }).where("id", listId).returning("list.*")
+    )[0]
+    await publish({ list: affectedList, sourceIndex, destinationIndex, userId: ctx.userId })
     return true
+  }
+
+  @Authorized([Role.BOARD])
+  @Subscription(() => ListMovedPayload, {
+    topics: Notification.LIST_MOVED,
+    filter: filterFunc((payload: ListMovedPayload) => payload.list, boardIdFilter),
+  })
+  async listMoved(@Arg("boardId") boardId: string, @Root() payload: ListMovedPayload) {
+    return payload
   }
 
   @Authorized()
@@ -87,7 +127,8 @@ export default class ListResolver {
   async renameList(
     @Arg("listId") listId: string,
     @Arg("name") name: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: Context,
+    @PubSub(Notification.LIST_RENAMED) publish: Publisher<List>
   ): Promise<RenameResponse> {
     if (name.length == 0) throw new Error("Name is empty")
     const list = await this.listService.list(ctx.userId, listId)
@@ -100,13 +141,32 @@ export default class ListResolver {
       if (existingList.id === listId) return { success: true }
       else return { exists: true }
     }
-    const affected = await List.query().patch({ name }).where("list.id", listId)
-    return { success: affected > 0 }
+    const affectedList = (
+      await List.query().patch({ name }).where("list.id", listId).returning("list.*")
+    )[0]
+    if (affectedList) {
+      await publish(affectedList)
+      return { success: true }
+    }
+    return { success: false }
+  }
+
+  @Authorized([Role.BOARD])
+  @Subscription(() => List, {
+    topics: Notification.LIST_RENAMED,
+    filter: boardIdFilter,
+  })
+  async listRenamed(@Arg("boardId") boardId: string, @Root() payload: List) {
+    return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
-  async deleteList(@Arg("id") id: string, @Ctx() ctx: Context) {
+  async deleteList(
+    @Arg("id") id: string,
+    @Ctx() ctx: Context,
+    @PubSub(Notification.LIST_DELETED) publish: Publisher<ListDeletedPayload>
+  ) {
     const list = await this.listService.list(ctx.userId, id)
     if (!list) return false
     await this.listService.list(ctx.userId, id).delete()
@@ -115,6 +175,18 @@ export default class ListResolver {
       .where("board_id", list.board_id)
       .andWhere("index", ">", list.index)
       .patch({ index: raw("index - 1") })
+    await publish({ boardId: list.board_id, listId: id })
     return true
+  }
+
+  @Authorized([Role.BOARD])
+  @Subscription(() => String, {
+    topics: Notification.LIST_DELETED,
+    filter: filterFunc((payload: ListDeletedPayload) => {
+      return { board_id: payload.boardId }
+    }, boardIdFilter),
+  })
+  async listDeleted(@Arg("boardId") boardId: string, @Root() payload: ListDeletedPayload) {
+    return payload.listId
   }
 }

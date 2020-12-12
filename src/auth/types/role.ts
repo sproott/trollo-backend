@@ -1,6 +1,7 @@
 enum Role {
   APP_ADMIN,
-  OWNER
+  OWNER,
+  BOARD,
 }
 
 export default Role

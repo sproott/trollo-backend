@@ -21,11 +21,12 @@ import BoardService from "./board.service"
 import TeamService from "../team/team.service"
 import { RenameResponse } from "../../common/types/objectTypes"
 import Notification from "../../common/types/notification"
-import { filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
-import boardFilter from "./board.filter"
+import { ConditionFuncData, filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
+import { boardFilter } from "./board.filter"
 import { BoardCreatedPayload, BoardDeletedPayload } from "./types/subscriptionPayloads"
 import teamParticipantFilter from "../team/team.filter"
 import { Participant } from "../participant/participant.model"
+import { BoardIdArgs } from "../../common/types/argTypes"
 
 @Resolver(Board)
 export default class BoardResolver {
@@ -113,8 +114,8 @@ export default class BoardResolver {
     filter: filterFunc(
       (board: Board) => board.id,
       boardFilter,
-      ({ payload, args }: FilterFuncData<Board, { boardId: string }>) => {
-        return !!args.boardId ? args.boardId === payload.id : true
+      ({ payload, args, filterResult }: ConditionFuncData<Board, BoardIdArgs>) => {
+        return filterResult && (!!args.boardId ? args.boardId === payload.id : true)
       }
     ),
   })
@@ -142,11 +143,7 @@ export default class BoardResolver {
   @Authorized()
   @Subscription(() => String, {
     topics: Notification.BOARD_DELETED,
-    filter: ({
-      context,
-      payload,
-      args,
-    }: FilterFuncData<BoardDeletedPayload, { boardId: string }>) =>
+    filter: ({ context, payload, args }: FilterFuncData<BoardDeletedPayload, BoardIdArgs>) =>
       !!payload.participantIds.find((id) => id === context.userId) &&
       (!!args.boardId ? args.boardId === payload.boardId : true),
   })

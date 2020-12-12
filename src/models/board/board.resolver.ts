@@ -110,9 +110,15 @@ export default class BoardResolver {
   @Authorized()
   @Subscription(() => Board, {
     topics: Notification.BOARD_RENAMED,
-    filter: filterFunc((board: Board) => board.id, boardFilter),
+    filter: filterFunc(
+      (board: Board) => board.id,
+      boardFilter,
+      ({ payload, args }: FilterFuncData<Board, { boardId: string }>) => {
+        return !!args.boardId ? args.boardId === payload.id : true
+      }
+    ),
   })
-  async boardRenamed(@Root() payload: Board) {
+  async boardRenamed(@Arg("boardId", { nullable: true }) boardId: string, @Root() payload: Board) {
     return payload
   }
 
@@ -136,10 +142,18 @@ export default class BoardResolver {
   @Authorized()
   @Subscription(() => String, {
     topics: Notification.BOARD_DELETED,
-    filter: ({ context, payload }: FilterFuncData<BoardDeletedPayload>) =>
-      !!payload.participantIds.find((id) => id === context.userId),
+    filter: ({
+      context,
+      payload,
+      args,
+    }: FilterFuncData<BoardDeletedPayload, { boardId: string }>) =>
+      !!payload.participantIds.find((id) => id === context.userId) &&
+      (!!args.boardId ? args.boardId === payload.boardId : true),
   })
-  async boardDeleted(@Root() payload: BoardDeletedPayload) {
+  async boardDeleted(
+    @Arg("boardId", { nullable: true }) boardId: string,
+    @Root() payload: BoardDeletedPayload
+  ) {
     return payload.boardId
   }
 

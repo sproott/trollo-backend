@@ -116,7 +116,13 @@ export default class ListResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => ListMovedPayload, {
     topics: Notification.LIST_MOVED,
-    filter: filterFunc((payload: ListMovedPayload) => payload.list, boardIdFilter),
+    filter: filterFunc(
+      (payload: ListMovedPayload) => payload.list,
+      boardIdFilter,
+      ({ context, payload, filterResult }) => {
+        return filterResult && context.userId !== payload.userId
+      }
+    ),
   })
   async listMoved(@Arg("boardId") boardId: string, @Root() payload: ListMovedPayload) {
     return payload

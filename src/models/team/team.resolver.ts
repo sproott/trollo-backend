@@ -27,7 +27,8 @@ import {
   TeamUserRemovedPayload,
 } from "./types/subscriptionPayloads"
 import teamParticipantFilter from "./team.filter"
-import { filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
+import { ConditionFuncData, filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
+import { TeamIdArgs } from "../../common/types/argTypes"
 
 @Resolver(Team)
 export default class TeamResolver {
@@ -156,9 +157,18 @@ export default class TeamResolver {
   @Authorized()
   @Subscription(() => TeamUserAddedPayload, {
     topics: Notification.TEAM_USER_ADDED,
-    filter: filterFunc((payload: TeamUserAddedPayload) => payload.team.id, teamParticipantFilter),
+    filter: filterFunc(
+      (payload: TeamUserAddedPayload) => payload.team.id,
+      teamParticipantFilter,
+      ({ payload, args, filterResult }: ConditionFuncData<TeamUserAddedPayload, TeamIdArgs>) => {
+        return filterResult && (args?.teamId ? args.teamId === payload.team.id : true)
+      }
+    ),
   })
-  teamUserAdded(@Root() payload: TeamUserAddedPayload) {
+  teamUserAdded(
+    @Arg("teamId", { nullable: true }) teamId: string,
+    @Root() payload: TeamUserAddedPayload
+  ) {
     return payload
   }
 
@@ -189,10 +199,20 @@ export default class TeamResolver {
     filter: filterFunc(
       (payload: TeamUserRemovedPayload) => payload.teamId,
       teamParticipantFilter,
-      ({ payload, context, filterResult }) => filterResult || payload.userId === context.userId
+      ({
+        payload,
+        context,
+        filterResult,
+        args,
+      }: ConditionFuncData<TeamUserRemovedPayload, TeamIdArgs>) =>
+        (filterResult || payload.userId === context.userId) &&
+        (args?.teamId ? args.teamId === payload.teamId : true)
     ),
   })
-  teamUserRemoved(@Root() payload: TeamUserRemovedPayload) {
+  teamUserRemoved(
+    @Arg("teamId", { nullable: true }) teamId: string,
+    @Root() payload: TeamUserRemovedPayload
+  ) {
     return payload
   }
 

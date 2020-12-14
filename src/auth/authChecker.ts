@@ -12,15 +12,11 @@ const customAuthChecker: AuthChecker<Context, Role> = async (
   roles: Role[]
 ) => {
   if (context.isUnauthenticated()) return false
-
   const user = await context.getUser()
-
   if (user.is_admin) return true
-
   if (roles.includes(Role.APP_ADMIN)) {
     return false
   }
-
   if (roles.includes(Role.OWNER)) {
     if (!(root instanceof User)) {
       throw new Error("Auth error - root of owner is not User")
@@ -29,11 +25,9 @@ const customAuthChecker: AuthChecker<Context, Role> = async (
       return false
     }
   }
-
   if (roles.includes(Role.BOARD)) {
     if (!(await boardService.board(context.userId, args["boardId"]))) return false
   }
-
   return true
 }
 

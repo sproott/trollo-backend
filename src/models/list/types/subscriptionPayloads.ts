@@ -10,13 +10,9 @@ export type ListDeletedPayload = {
 export class ListMovedPayload {
   @Field()
   list: List
-
   @Field()
   sourceIndex: number
-
   @Field()
   destinationIndex: number
-
-  @Field()
   userId: string
 }

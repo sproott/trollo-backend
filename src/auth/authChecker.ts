@@ -25,7 +25,7 @@ const customAuthChecker: AuthChecker<Context, Role> = async (
       return false
     }
   }
-  if (roles.includes(Role.BOARD)) {
+  if (roles.includes(Role.BOARD) && args["boardId"]) {
     if (!(await boardService.board(context.userId, args["boardId"]))) return false
   }
   return true

@@ -201,7 +201,7 @@ export default class CardResolver {
         .returning("card.*")
     )[0]
     if (!!affectedCard) {
-      await publish({ card: affectedCard, boardId: card.list.board_id })
+      await publish({ card: affectedCard, boardId: affectedCard.list.board_id })
       return { success: true }
     }
     return { success: false }

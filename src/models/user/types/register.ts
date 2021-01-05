@@ -1,10 +1,12 @@
-import { GraphQLError } from "graphql"
 import { Field, ObjectType } from "type-graphql"
+
+import { NotContains } from "class-validator"
 import User from "../user.model"
 
 @ObjectType()
 export class RegisterError {
   @Field({ nullable: true })
+  @NotContains("@")
   email?: boolean
 
   @Field({ nullable: true })

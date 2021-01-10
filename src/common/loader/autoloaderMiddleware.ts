@@ -19,6 +19,7 @@ const mappings = {
 export const AutoLoader = (params?: {
   relationName?: string
   customCondition?: ConditionFn
+  debug?: boolean
 }): MiddlewareFn => async ({
   root,
   context,
@@ -37,8 +38,7 @@ export const AutoLoader = (params?: {
       `Error: Relation "${info.fieldName}" missing in relation mappings of class "${root.constructor.name}"`
     )
   }
-  // @ts-ignore
-  let loader: Loader<typeof model>
+  let loader: Loader
   if (field.relation.name in mappings) {
     loader = context.loaderContainer.getLoader({
       ...mappings[field.relation.name],
@@ -55,6 +55,14 @@ export const AutoLoader = (params?: {
     if (field.relation === Model.HasManyRelation) return []
     else return null
   } else {
-    return loader.load(id, params?.customCondition)
+    return loader.load(id, (qb) => {
+      if (params?.customCondition) {
+        qb = params.customCondition(qb)
+      }
+      if (params?.debug) {
+        qb = qb.debug()
+      }
+      return qb
+    })
   }
 }

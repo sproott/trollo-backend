@@ -1,6 +1,8 @@
 import { Field, ID, Int, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
+
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
+import Flair from "../flair/flair.model"
 import List from "../list/list.model"
 import { MaxLength } from "class-validator"
 import User from "../user/user.model"
@@ -15,11 +17,9 @@ export default class Card extends Model {
   id: string
 
   @Field()
-  @MaxLength(50)
   name: string
 
   @Field({ nullable: true })
-  @MaxLength(256)
   description: string
 
   @Field(() => Int)
@@ -34,6 +34,10 @@ export default class Card extends Model {
   @Field(() => List)
   list: List
   list_id: string
+
+  @UseMiddleware(AutoLoader())
+  @Field(() => [Flair])
+  flairs: Flair[]
 
   static get relationMappings(): RelationMappings {
     return {
@@ -51,6 +55,18 @@ export default class Card extends Model {
         join: {
           from: "card.assignee_id",
           to: "user.id",
+        },
+      },
+      flairs: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Flair,
+        join: {
+          from: "card.id",
+          through: {
+            from: "cards_flairs.card_id",
+            to: "cards_flairs.flair_id",
+          },
+          to: "flair.id",
         },
       },
     }

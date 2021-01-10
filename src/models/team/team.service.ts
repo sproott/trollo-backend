@@ -1,7 +1,7 @@
-import { Singleton } from "typescript-ioc"
-import Team from "./team.model"
 import Card from "../card/card.model"
 import { Participant } from "../participant/participant.model"
+import { Singleton } from "typescript-ioc"
+import Team from "./team.model"
 
 @Singleton
 export default class TeamService {

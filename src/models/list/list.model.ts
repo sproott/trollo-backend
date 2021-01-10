@@ -1,8 +1,9 @@
 import { Field, ID, Int, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
+
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
-import Card from "../card/card.model"
 import Board from "../board/board.model"
+import Card from "../card/card.model"
 import { MaxLength } from "class-validator"
 
 @ObjectType()
@@ -15,7 +16,6 @@ export default class List extends Model {
   id: string
 
   @Field()
-  @MaxLength(50)
   name: string
 
   @Field(() => Int)

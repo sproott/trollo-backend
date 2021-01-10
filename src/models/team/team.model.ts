@@ -1,9 +1,11 @@
 import { Field, ID, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
+
 import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Board from "../board/board.model"
-import { Participant } from "../participant/participant.model"
+import Flair from "../flair/flair.model"
 import { MaxLength } from "class-validator"
+import { Participant } from "../participant/participant.model"
 
 @ObjectType()
 export default class Team extends Model {
@@ -15,7 +17,6 @@ export default class Team extends Model {
   id: string
 
   @Field()
-  @MaxLength(50)
   name: string
 
   @UseMiddleware(AutoLoader())
@@ -25,6 +26,10 @@ export default class Team extends Model {
   @UseMiddleware(AutoLoader())
   @Field(() => [Participant])
   participants: Participant[]
+
+  @UseMiddleware(AutoLoader())
+  @Field(() => [Flair])
+  flairs: Flair[]
 
   static get relationMappings(): RelationMappings {
     return {
@@ -42,6 +47,14 @@ export default class Team extends Model {
         join: {
           from: "team.id",
           to: "board.team_id",
+        },
+      },
+      flairs: {
+        relation: Model.HasManyRelation,
+        modelClass: Flair,
+        join: {
+          from: "team.id",
+          to: "flair.team_id",
         },
       },
     }

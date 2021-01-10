@@ -26,7 +26,7 @@ import {
   TeamUserAddedPayload,
   TeamUserRemovedPayload,
 } from "./types/subscriptionPayloads"
-import teamParticipantFilter from "./team.filter"
+import { teamParticipantFilter } from "./team.filter"
 import { ConditionFuncData, filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
 import { TeamIdArgs } from "../../common/types/argTypes"
 

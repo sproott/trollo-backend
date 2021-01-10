@@ -11,7 +11,7 @@
     "node": "15.x"
   },
   "scripts": {
-    "dev": "set NODE_ENV=development&& tsnd --deps --respawn ./src/index.ts",
+    "dev": "set NODE_ENV=development & tsnd --deps --respawn ./src/index.ts",
     "migrate": "knex migrate:latest && knex seed:run",
     "start": "cd build && node ./src/index.js ",
     "build": "tsc"

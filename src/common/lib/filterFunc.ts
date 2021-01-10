@@ -22,7 +22,7 @@ export const filterFunc = <TPayload, TConverted, TArgs = undefined>(
 }
 
 export type ConditionFunc<TPayload, TArgs = undefined> = (
-  args: FilterFuncData<TPayload, TArgs> & { filterResult: boolean }
+  args: ConditionFuncData<TPayload, TArgs>
 ) => boolean | Promise<boolean>
 
 export type FilterFuncInner<TPayload, TArgs = undefined> = (

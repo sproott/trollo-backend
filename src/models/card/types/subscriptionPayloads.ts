@@ -1,5 +1,6 @@
-import Card from "../card.model"
 import { Field, ObjectType } from "type-graphql"
+
+import Card from "../card.model"
 import User from "../../user/user.model"
 
 @ObjectType()

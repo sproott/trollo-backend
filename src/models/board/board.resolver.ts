@@ -24,7 +24,7 @@ import Notification from "../../common/types/notification"
 import { ConditionFuncData, filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
 import { boardFilter } from "./board.filter"
 import { BoardCreatedPayload, BoardDeletedPayload } from "./types/subscriptionPayloads"
-import teamParticipantFilter from "../team/team.filter"
+import { teamParticipantFilter } from "../team/team.filter"
 import { Participant } from "../participant/participant.model"
 import { BoardIdArgs } from "../../common/types/argTypes"
 

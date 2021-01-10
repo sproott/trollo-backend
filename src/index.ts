@@ -1,17 +1,20 @@
 import "reflect-metadata"
+
+import * as http from "http"
+
+import { isProduction, sleep } from "./common/lib/util"
+
+import { ApolloServer } from "apollo-server-express"
 import { Model } from "objection"
-import { knex } from "../db/knex"
+import ON_DEATH from "death"
+import cors from "cors"
 import express from "express"
+import getApolloConfig from "./init/apolloConfig"
+import initPassport from "./init/initPassport"
+import { knex } from "../db/knex"
+import passport from "passport"
 import session from "express-session"
 import { v4 as uuid } from "uuid"
-import passport from "passport"
-import { ApolloServer } from "apollo-server-express"
-import initPassport from "./init/initPassport"
-import getApolloConfig from "./init/apolloConfig"
-import { isProduction, sleep } from "./common/lib/util"
-import ON_DEATH from "death"
-import * as http from "http"
-import cors from "cors"
 
 const KnexSessionStore = require("connect-session-knex")(session)
 
@@ -131,26 +134,21 @@ async function startServer(maxTries = 3) {
 
 const boot = startServer(3)
 
-const gracefullyShutDown = (signal: string) => {
+ON_DEATH(async (signal) => {
   console.info(
     `\nReceived ${signal} signal, gracefully shutting down. \nStarted at: ${new Date().toISOString()}`
   )
 
-  return new Promise((resolve) => {
-    !!apolloServer ? apolloServer.stop() : resolve(undefined)
-  })
-    .then(() => {
-      console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
-    })
-    .catch((error: any) => {
-      console.error(
-        `Shutdown error! \nMore info: ${error} \nFinished at: ${new Date().toISOString()}`
-      )
-    })
-}
-
-ON_DEATH((signal) => {
-  return gracefullyShutDown(signal)
+  try {
+    await apolloServer?.stop()
+    console.info(`Shutdown successful! \nFinished at: ${new Date().toISOString()}`)
+  } catch (error) {
+    console.error(
+      `Shutdown error! \nMore info: ${error} \nFinished at: ${new Date().toISOString()}`
+    )
+  } finally {
+    process.exit(0)
+  }
 })
 
 export { server, apolloServer, boot }

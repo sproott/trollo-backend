@@ -22,7 +22,7 @@ import Notification from "../../common/types/notification"
 import { ListDeletedPayload, ListMovedPayload } from "./types/subscriptionPayloads"
 import Role from "../../auth/types/role"
 import { boardIdFilter } from "../board/board.filter"
-import { filterFunc } from "../../common/lib/filterFunc"
+import { and, transform } from "../../common/lib/filterFunc"
 
 @Resolver(List)
 export default class ListResolver {
@@ -116,11 +116,10 @@ export default class ListResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => ListMovedPayload, {
     topics: Notification.LIST_MOVED,
-    filter: filterFunc(
-      (payload: ListMovedPayload) => payload.list,
-      boardIdFilter,
-      ({ context, payload, filterResult }) => {
-        return filterResult && context.userId !== payload.userId
+    filter: and<ListMovedPayload>(
+      transform((payload) => payload.list, boardIdFilter),
+      ({ context, payload }) => {
+        return context.userId !== payload.userId
       }
     ),
   })
@@ -188,7 +187,7 @@ export default class ListResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => String, {
     topics: Notification.LIST_DELETED,
-    filter: filterFunc((payload: ListDeletedPayload) => {
+    filter: transform((payload: ListDeletedPayload) => {
       return { board_id: payload.boardId }
     }, boardIdFilter),
   })

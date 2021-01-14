@@ -32,7 +32,8 @@ import {
 import Notification from "../../common/types/notification"
 import { boardIdFilter } from "../board/board.filter"
 import UserService from "../user/user.service"
-import { filterFunc } from "../../common/lib/filterFunc"
+import { BoardIdArgs } from "../../common/types/argTypes"
+import { and, FilterFuncData } from "../../common/lib/filterFunc"
 
 @Resolver(Card)
 export default class CardResolver {
@@ -156,13 +157,9 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => CardMovedPayload, {
     topics: Notification.CARD_MOVED,
-    filter: filterFunc(
-      (p) => p,
-      boardIdFilter,
-      ({ context, payload, filterResult }) => {
-        return filterResult && context.userId !== payload.userId
-      }
-    ),
+    filter: and(boardIdFilter, ({ context, payload }: FilterFuncData<CardMovedPayload>) => {
+      return context.userId !== payload.userId
+    }),
   })
   async cardMoved(@Arg("boardId") boardId: string, @Root() payload: CardMovedPayload) {
     return payload
@@ -247,7 +244,7 @@ export default class CardResolver {
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_DELETED) publish: Publisher<CardIdBoardIdPayload>
   ) {
-    const card = await this.cardService.card(ctx.userId, id).joinRelated("list")
+    const card = await this.cardService.card(ctx.userId, id).withGraphFetched("list")
     if (!card) return false
     await this.cardService.card(ctx.userId, id).delete()
     await this.cardService

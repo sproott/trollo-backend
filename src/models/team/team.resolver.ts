@@ -27,7 +27,7 @@ import {
   TeamUserRemovedPayload,
 } from "./types/subscriptionPayloads"
 import { teamParticipantFilter } from "./team.filter"
-import { ConditionFuncData, filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
+import { and, FilterFuncData, or, transform } from "../../common/lib/filterFunc"
 import { TeamIdArgs } from "../../common/types/argTypes"
 
 @Resolver(Team)
@@ -121,7 +121,7 @@ export default class TeamResolver {
   @Authorized()
   @Subscription(() => Team, {
     topics: Notification.TEAM_RENAMED,
-    filter: filterFunc((team: Team) => team.id, teamParticipantFilter),
+    filter: transform((team: Team) => team.id, teamParticipantFilter),
   })
   teamRenamed(@Root() team: Team) {
     return team
@@ -157,11 +157,10 @@ export default class TeamResolver {
   @Authorized()
   @Subscription(() => TeamUserAddedPayload, {
     topics: Notification.TEAM_USER_ADDED,
-    filter: filterFunc(
-      (payload: TeamUserAddedPayload) => payload.team.id,
-      teamParticipantFilter,
-      ({ payload, args, filterResult }: ConditionFuncData<TeamUserAddedPayload, TeamIdArgs>) => {
-        return filterResult && (args?.teamId ? args.teamId === payload.team.id : true)
+    filter: and<TeamUserAddedPayload, TeamIdArgs>(
+      transform((payload) => payload.team.id, teamParticipantFilter),
+      ({ payload, args }) => {
+        return args?.teamId ? args.teamId === payload.team.id : true
       }
     ),
   })
@@ -196,17 +195,12 @@ export default class TeamResolver {
   @Authorized()
   @Subscription(() => TeamUserRemovedPayload, {
     topics: Notification.TEAM_USER_REMOVED,
-    filter: filterFunc(
-      (payload: TeamUserRemovedPayload) => payload.teamId,
-      teamParticipantFilter,
-      ({
-        payload,
-        context,
-        filterResult,
-        args,
-      }: ConditionFuncData<TeamUserRemovedPayload, TeamIdArgs>) =>
-        (filterResult || payload.userId === context.userId) &&
-        (args?.teamId ? args.teamId === payload.teamId : true)
+    filter: and<TeamUserRemovedPayload, TeamIdArgs>(
+      or(
+        transform((payload) => payload.teamId, teamParticipantFilter),
+        ({ payload, context }) => payload.userId === context.userId
+      ),
+      ({ payload, args }) => (args?.teamId ? args.teamId === payload.teamId : true)
     ),
   })
   teamUserRemoved(

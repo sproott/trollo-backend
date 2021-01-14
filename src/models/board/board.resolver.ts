@@ -21,7 +21,7 @@ import BoardService from "./board.service"
 import TeamService from "../team/team.service"
 import { RenameResponse } from "../../common/types/objectTypes"
 import Notification from "../../common/types/notification"
-import { ConditionFuncData, filterFunc, FilterFuncData } from "../../common/lib/filterFunc"
+import { and, FilterFuncData, transform } from "../../common/lib/filterFunc"
 import { boardFilter } from "./board.filter"
 import { BoardCreatedPayload, BoardDeletedPayload } from "./types/subscriptionPayloads"
 import { teamParticipantFilter } from "../team/team.filter"
@@ -73,7 +73,7 @@ export default class BoardResolver {
   @Authorized()
   @Subscription(() => BoardCreatedPayload, {
     topics: Notification.BOARD_CREATED,
-    filter: filterFunc((payload: BoardCreatedPayload) => payload.teamId, teamParticipantFilter),
+    filter: transform((payload: BoardCreatedPayload) => payload.teamId, teamParticipantFilter),
   })
   async boardCreated(@Root() payload: BoardCreatedPayload) {
     return payload
@@ -111,11 +111,10 @@ export default class BoardResolver {
   @Authorized()
   @Subscription(() => Board, {
     topics: Notification.BOARD_RENAMED,
-    filter: filterFunc(
-      (board: Board) => board.id,
-      boardFilter,
-      ({ payload, args, filterResult }: ConditionFuncData<Board, BoardIdArgs>) => {
-        return filterResult && (!!args.boardId ? args.boardId === payload.id : true)
+    filter: and<Board, BoardIdArgs>(
+      transform((board) => board.id, boardFilter),
+      ({ payload, args }) => {
+        return !!args.boardId ? args.boardId === payload.id : true
       }
     ),
   })

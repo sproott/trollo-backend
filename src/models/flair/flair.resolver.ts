@@ -24,17 +24,15 @@ import { teamParticipantFilter } from "../team/team.filter"
 import FlairService from "./flair.service"
 import { Inject } from "typescript-ioc"
 import Context from "../../common/types/context"
-import { ConditionFuncData, filterFunc } from "../../common/lib/filterFunc"
 import { TeamIdArgs } from "../../common/types/argTypes"
 import { RenameResponse } from "../../common/types/objectTypes"
 import CardService from "../card/card.service"
 import Role from "../../auth/types/role"
+import { and, transform } from "../../common/lib/filterFunc"
 
-const flairTeamIdFilter = filterFunc(
-  (p) => p.team_id,
-  teamParticipantFilter,
-  ({ filterResult, payload, args }: ConditionFuncData<Flair, TeamIdArgs>) =>
-    filterResult && payload.team_id === args.teamId
+const flairTeamIdFilter = and<Flair, TeamIdArgs>(
+  transform((p) => p.team_id, teamParticipantFilter),
+  ({ payload, args }) => payload.team_id === args.teamId
 )
 
 @Resolver(Flair)
@@ -159,11 +157,9 @@ export default class FlairResolver {
   @Authorized([Role.TEAM])
   @Subscription(() => FlairIdTeamIdPayload, {
     topics: Notification.FLAIR_DELETED,
-    filter: filterFunc(
-      (p) => p.teamId,
-      teamParticipantFilter,
-      ({ filterResult, payload, args }: ConditionFuncData<FlairIdTeamIdPayload, TeamIdArgs>) =>
-        filterResult && payload.teamId === args.teamId
+    filter: and<FlairIdTeamIdPayload, TeamIdArgs>(
+      transform((p) => p.teamId, teamParticipantFilter),
+      ({ payload, args }) => payload.teamId === args.teamId
     ),
   })
   async flairDeleted(@Arg("teamId") teamId: string, @Root() payload: FlairIdTeamIdPayload) {
@@ -193,16 +189,10 @@ export default class FlairResolver {
   @Authorized([Role.TEAM])
   @Subscription(() => FlairIdCardIdTeamIdPayload, {
     topics: Notification.FLAIR_ASSIGNED,
-    filter: filterFunc(
-      (p) => p.teamId,
-      teamParticipantFilter,
-      ({
-        filterResult,
-        payload,
-        args,
-        context,
-      }: ConditionFuncData<FlairAssignmentPayload, TeamIdArgs>) =>
-        filterResult && payload.teamId === args.teamId && payload.userId !== context.userId
+    filter: and<FlairAssignmentPayload, TeamIdArgs>(
+      transform((p) => p.teamId, teamParticipantFilter),
+      ({ payload, args, context }) =>
+        payload.teamId === args.teamId && payload.userId !== context.userId
     ),
   })
   async flairAssigned(
@@ -235,16 +225,10 @@ export default class FlairResolver {
   @Authorized([Role.TEAM])
   @Subscription(() => FlairIdCardIdTeamIdPayload, {
     topics: Notification.FLAIR_UNASSIGNED,
-    filter: filterFunc(
-      (p) => p.teamId,
-      teamParticipantFilter,
-      ({
-        filterResult,
-        payload,
-        args,
-        context,
-      }: ConditionFuncData<FlairAssignmentPayload, TeamIdArgs>) =>
-        filterResult && payload.teamId === args.teamId && payload.userId !== context.userId
+    filter: and<FlairAssignmentPayload, TeamIdArgs>(
+      transform((p) => p.teamId, teamParticipantFilter),
+      ({ payload, args, context }) =>
+        payload.teamId === args.teamId && payload.userId !== context.userId
     ),
   })
   async flairUnassigned(

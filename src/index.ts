@@ -52,7 +52,7 @@ async function init() {
 
   // add session capability to app
   const sessionMiddleware = session({
-    genid: (req) => uuid(),
+    genid: () => uuid(),
     secret: process.env.SESSION_SECRET ?? "y-L%@V!*s=A6R4Bv",
     resave: false,
     saveUninitialized: false,

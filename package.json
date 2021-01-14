@@ -28,6 +28,7 @@
     "express-session": "^1.17.1",
     "fast-json-stable-stringify": "^2.1.0",
     "graphql": "^15.4.0",
+    "graphql-query-complexity": "^0.7.2",
     "graphql-tools": "^7.0.2",
     "knex": "^0.21.12",
     "objection": "^2.2.3",

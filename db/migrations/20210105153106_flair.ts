@@ -13,6 +13,7 @@ export async function up(knex: Knex): Promise<void> {
     .createTable("cards_flairs", (table) => {
       table.uuid("card_id").references("id").inTable("card").onDelete("CASCADE")
       table.uuid("flair_id").references("id").inTable("flair").onDelete("CASCADE")
+      table.unique(["card_id", "flair_id"])
     })
 }
 

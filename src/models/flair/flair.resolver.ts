@@ -15,7 +15,11 @@ import {
 import { CreateFlairResponse, CreateFlairInput as CreateFlairArgs } from "./types/createFlair"
 import { raw } from "objection"
 import Notification from "../../common/types/notification"
-import { FlairIdTeamIdPayload, FlairTeamIdPayload } from "./types/subscriptionPayloads"
+import {
+  FlairAssignmentPayload,
+  FlairIdCardIdTeamIdPayload,
+  FlairIdTeamIdPayload,
+} from "./types/subscriptionPayloads"
 import { teamParticipantFilter } from "../team/team.filter"
 import FlairService from "./flair.service"
 import { Inject } from "typescript-ioc"
@@ -23,6 +27,8 @@ import Context from "../../common/types/context"
 import { ConditionFuncData, filterFunc } from "../../common/lib/filterFunc"
 import { TeamIdArgs } from "../../common/types/argTypes"
 import { RenameResponse } from "../../common/types/objectTypes"
+import CardService from "../card/card.service"
+import Role from "../../auth/types/role"
 
 const flairTeamIdFilter = filterFunc(
   (p) => p.team_id,
@@ -35,6 +41,8 @@ const flairTeamIdFilter = filterFunc(
 export default class FlairResolver {
   @Inject
   private flairService: FlairService
+  @Inject
+  private cardService: CardService
 
   @Authorized()
   @Mutation(() => CreateFlairResponse)
@@ -60,7 +68,7 @@ export default class FlairResolver {
     return { flair: newFlair }
   }
 
-  @Authorized()
+  @Authorized([Role.TEAM])
   @Subscription(() => Flair, {
     topics: Notification.FLAIR_CREATED,
     filter: flairTeamIdFilter,
@@ -108,7 +116,7 @@ export default class FlairResolver {
       .flairs(ctx.userId)
       .where("flair.team_id", flair.team_id)
       .findOne(raw("LOWER(flair.name)"), name.toLowerCase())
-    if (!!existingFlair) return { exists: true }
+    if (existingFlair) return { exists: true }
     const affectedFlair = (
       await Flair.query()
         .patch({ name })
@@ -122,7 +130,7 @@ export default class FlairResolver {
     return { success: false }
   }
 
-  @Authorized()
+  @Authorized([Role.TEAM])
   @Subscription(() => Flair, {
     topics: Notification.FLAIR_UPDATED,
     filter: flairTeamIdFilter,
@@ -148,7 +156,7 @@ export default class FlairResolver {
     }
   }
 
-  @Authorized()
+  @Authorized([Role.TEAM])
   @Subscription(() => FlairIdTeamIdPayload, {
     topics: Notification.FLAIR_DELETED,
     filter: filterFunc(
@@ -159,6 +167,90 @@ export default class FlairResolver {
     ),
   })
   async flairDeleted(@Arg("teamId") teamId: string, @Root() payload: FlairIdTeamIdPayload) {
+    return payload
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async assignFlair(
+    @Arg("cardId") cardId: string,
+    @Arg("flairId") flairId: string,
+    @Ctx() ctx: Context,
+    @PubSub(Notification.FLAIR_ASSIGNED) publish: Publisher<FlairAssignmentPayload>
+  ) {
+    const flair = await this.flairService.flair(ctx.userId, flairId)
+    if (!flair) return false
+    const card = await this.cardService
+      .card(ctx.userId, cardId)
+      .withGraphJoined("list.[board.[team]]")
+      .where("list:board:team.id", flair.team_id)
+    if (!card) return false
+    await card.$relatedQuery("flairs").relate(flair)
+    await publish({ flairId, cardId, teamId: flair.team_id, userId: ctx.userId })
+    return true
+  }
+
+  @Authorized([Role.TEAM])
+  @Subscription(() => FlairIdCardIdTeamIdPayload, {
+    topics: Notification.FLAIR_ASSIGNED,
+    filter: filterFunc(
+      (p) => p.teamId,
+      teamParticipantFilter,
+      ({
+        filterResult,
+        payload,
+        args,
+        context,
+      }: ConditionFuncData<FlairAssignmentPayload, TeamIdArgs>) =>
+        filterResult && payload.teamId === args.teamId && payload.userId !== context.userId
+    ),
+  })
+  async flairAssigned(
+    @Arg("teamId") teamId: string,
+    @Root() payload: FlairAssignmentPayload
+  ): Promise<FlairIdCardIdTeamIdPayload> {
+    return payload
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async unassignFlair(
+    @Arg("cardId") cardId: string,
+    @Arg("flairId") flairId: string,
+    @Ctx() ctx: Context,
+    @PubSub(Notification.FLAIR_UNASSIGNED) publish: Publisher<FlairAssignmentPayload>
+  ) {
+    const flair = await this.flairService.flair(ctx.userId, flairId)
+    if (!flair) return false
+    const card = await this.cardService
+      .card(ctx.userId, cardId)
+      .withGraphJoined("list.[board.[team]]")
+      .where("list:board:team.id", flair.team_id)
+    if (!card) return false
+    await card.$relatedQuery("flairs").unrelate().where("flair_id", flairId)
+    await publish({ flairId, cardId, teamId: flair.team_id, userId: ctx.userId })
+    return true
+  }
+
+  @Authorized([Role.TEAM])
+  @Subscription(() => FlairIdCardIdTeamIdPayload, {
+    topics: Notification.FLAIR_UNASSIGNED,
+    filter: filterFunc(
+      (p) => p.teamId,
+      teamParticipantFilter,
+      ({
+        filterResult,
+        payload,
+        args,
+        context,
+      }: ConditionFuncData<FlairAssignmentPayload, TeamIdArgs>) =>
+        filterResult && payload.teamId === args.teamId && payload.userId !== context.userId
+    ),
+  })
+  async flairUnassigned(
+    @Arg("teamId") teamId: string,
+    @Root() payload: FlairAssignmentPayload
+  ): Promise<FlairIdCardIdTeamIdPayload> {
     return payload
   }
 }

@@ -17,3 +17,15 @@ export class FlairIdTeamIdPayload {
   @Field()
   teamId: string
 }
+
+@ObjectType()
+export class FlairIdCardIdTeamIdPayload {
+  @Field()
+  flairId: string
+  @Field()
+  cardId: string
+  @Field()
+  teamId: string
+}
+
+export type FlairAssignmentPayload = FlairIdCardIdTeamIdPayload & { userId: string }

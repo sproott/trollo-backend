@@ -42,7 +42,7 @@ export default class BoardResolver {
 
   @Authorized()
   @Query(() => Board)
-  async board(@Arg("id") id: string, @Ctx() ctx: Context) {
+  async board(@Arg("id", () => ID) id: string, @Ctx() ctx: Context) {
     return this.boardService.board(ctx.userId, id)
   }
 
@@ -119,7 +119,10 @@ export default class BoardResolver {
       }
     ),
   })
-  async boardRenamed(@Arg("boardId", { nullable: true }) boardId: string, @Root() payload: Board) {
+  async boardRenamed(
+    @Arg("boardId", () => ID, { nullable: true }) boardId: string,
+    @Root() payload: Board
+  ) {
     return payload
   }
 

@@ -1,4 +1,4 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql"
+import { Arg, Authorized, Ctx, ID, Mutation, Query, Resolver } from "type-graphql"
 import User from "./user.model"
 import { LoginInput, RegisterInput } from "./user.input"
 import { Inject } from "typescript-ioc"

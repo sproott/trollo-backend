@@ -237,7 +237,10 @@ export default class CardResolver {
     topics: Notification.CARD_UPDATED,
     filter: boardIdFilter,
   })
-  async cardUpdated(@Arg("boardId") boardId: string, @Root() payload: CardUpdatedPayload) {
+  async cardUpdated(
+    @Arg("boardId", () => ID) boardId: string,
+    @Root() payload: CardUpdatedPayload
+  ) {
     return payload.card
   }
 
@@ -265,7 +268,10 @@ export default class CardResolver {
     topics: Notification.CARD_DELETED,
     filter: boardIdFilter,
   })
-  async cardDeleted(@Arg("boardId") boardId: string, @Root() payload: CardIdBoardIdPayload) {
+  async cardDeleted(
+    @Arg("boardId", () => ID) boardId: string,
+    @Root() payload: CardIdBoardIdPayload
+  ) {
     return payload
   }
 
@@ -348,7 +354,10 @@ export default class CardResolver {
     topics: Notification.CARD_USER_UNASSIGNED,
     filter: boardIdFilter,
   })
-  async cardUserUnassigned(@Arg("boardId") boardId: string, @Root() payload: CardIdBoardIdPayload) {
+  async cardUserUnassigned(
+    @Arg("boardId", () => ID) boardId: string,
+    @Root() payload: CardIdBoardIdPayload
+  ) {
     return payload
   }
 }

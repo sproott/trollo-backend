@@ -1,4 +1,4 @@
-import { ArgsType, Field, Int, ObjectType } from "type-graphql"
+import { ArgsType, Field, ID, Int, ObjectType } from "type-graphql"
 import { IsNotEmpty, Max, MaxLength } from "class-validator"
 
 import Flair from "../flair.model"
@@ -13,7 +13,7 @@ export class CreateFlairResponse {
 }
 
 @ArgsType()
-export class CreateFlairInput {
+export class CreateFlairArgs {
   @Field()
   @IsNotEmpty()
   @MaxLength(20)
@@ -23,6 +23,6 @@ export class CreateFlairInput {
   @Max(360)
   hue: number
 
-  @Field()
+  @Field(() => ID)
   teamId: string
 }

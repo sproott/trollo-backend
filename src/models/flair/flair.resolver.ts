@@ -13,7 +13,7 @@ import {
   Root,
   Subscription,
 } from "type-graphql"
-import { CreateFlairResponse, CreateFlairInput as CreateFlairArgs } from "./types/createFlair"
+import { CreateFlairResponse, CreateFlairArgs } from "./types/createFlair"
 import { raw } from "objection"
 import Notification from "../../common/types/notification"
 import {

@@ -3,6 +3,7 @@ import {
   Arg,
   Authorized,
   Ctx,
+  ID,
   Mutation,
   Publisher,
   PubSub,
@@ -58,7 +59,7 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async deleteTeam(
-    @Arg("id") id: string,
+    @Arg("id", () => ID) id: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.TEAM_DELETED) publish: Publisher<TeamDeletedPayload>
   ) {
@@ -92,7 +93,7 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => RenameResponse)
   async renameTeam(
-    @Arg("teamId") teamId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.TEAM_RENAMED) publish: Publisher<Team>
@@ -130,7 +131,7 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => AddUserResponse)
   async addUser(
-    @Arg("teamId") teamId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Arg("username") username: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.TEAM_USER_ADDED) publish: Publisher<TeamUserAddedPayload>
@@ -165,7 +166,7 @@ export default class TeamResolver {
     ),
   })
   teamUserAdded(
-    @Arg("teamId", { nullable: true }) teamId: string,
+    @Arg("teamId", () => ID, { nullable: true }) teamId: string,
     @Root() payload: TeamUserAddedPayload
   ) {
     return payload
@@ -174,8 +175,8 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async removeUser(
-    @Arg("userId") userId: string,
-    @Arg("teamId") teamId: string,
+    @Arg("userId", () => ID) userId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.TEAM_USER_REMOVED) publish: Publisher<TeamUserRemovedPayload>
   ) {
@@ -204,7 +205,7 @@ export default class TeamResolver {
     ),
   })
   teamUserRemoved(
-    @Arg("teamId", { nullable: true }) teamId: string,
+    @Arg("teamId", () => ID, { nullable: true }) teamId: string,
     @Root() payload: TeamUserRemovedPayload
   ) {
     return payload
@@ -213,7 +214,7 @@ export default class TeamResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async leaveTeam(
-    @Arg("teamId") teamId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.TEAM_USER_REMOVED) publish: Publisher<TeamUserRemovedPayload>
   ) {

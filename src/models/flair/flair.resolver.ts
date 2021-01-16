@@ -4,6 +4,7 @@ import {
   Args,
   Authorized,
   Ctx,
+  ID,
   Int,
   Mutation,
   Publisher,
@@ -71,14 +72,14 @@ export default class FlairResolver {
     topics: Notification.FLAIR_CREATED,
     filter: flairTeamIdFilter,
   })
-  async flairCreated(@Arg("teamId") teamId: string, @Root() payload: Flair) {
+  async flairCreated(@Arg("teamId", () => ID) teamId: string, @Root() payload: Flair) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async changeFlairHue(
-    @Arg("flairId") flairId: string,
+    @Arg("flairId", () => ID) flairId: string,
     @Arg("hue", () => Int) hue: number,
     @Ctx() ctx: Context,
     @PubSub(Notification.FLAIR_UPDATED) publish: Publisher<Flair>
@@ -100,7 +101,7 @@ export default class FlairResolver {
   @Authorized()
   @Mutation(() => RenameResponse)
   async renameFlair(
-    @Arg("flairId") flairId: string,
+    @Arg("flairId", () => ID) flairId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.FLAIR_UPDATED) publish: Publisher<Flair>
@@ -133,14 +134,14 @@ export default class FlairResolver {
     topics: Notification.FLAIR_UPDATED,
     filter: flairTeamIdFilter,
   })
-  async flairUpdated(@Arg("teamId") teamId: string, @Root() payload: Flair) {
+  async flairUpdated(@Arg("teamId", () => ID) teamId: string, @Root() payload: Flair) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async deleteFlair(
-    @Arg("flairId") flairId: string,
+    @Arg("flairId", () => ID) flairId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.FLAIR_DELETED) publish: Publisher<FlairIdTeamIdPayload>
   ) {
@@ -162,15 +163,18 @@ export default class FlairResolver {
       ({ payload, args }) => payload.teamId === args.teamId
     ),
   })
-  async flairDeleted(@Arg("teamId") teamId: string, @Root() payload: FlairIdTeamIdPayload) {
+  async flairDeleted(
+    @Arg("teamId", () => ID) teamId: string,
+    @Root() payload: FlairIdTeamIdPayload
+  ) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async assignFlair(
-    @Arg("cardId") cardId: string,
-    @Arg("flairId") flairId: string,
+    @Arg("cardId", () => ID) cardId: string,
+    @Arg("flairId", () => ID) flairId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.FLAIR_ASSIGNED) publish: Publisher<FlairAssignmentPayload>
   ) {
@@ -196,7 +200,7 @@ export default class FlairResolver {
     ),
   })
   async flairAssigned(
-    @Arg("teamId") teamId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Root() payload: FlairAssignmentPayload
   ): Promise<FlairIdCardIdTeamIdPayload> {
     return payload
@@ -205,8 +209,8 @@ export default class FlairResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async unassignFlair(
-    @Arg("cardId") cardId: string,
-    @Arg("flairId") flairId: string,
+    @Arg("cardId", () => ID) cardId: string,
+    @Arg("flairId", () => ID) flairId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.FLAIR_UNASSIGNED) publish: Publisher<FlairAssignmentPayload>
   ) {
@@ -232,7 +236,7 @@ export default class FlairResolver {
     ),
   })
   async flairUnassigned(
-    @Arg("teamId") teamId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Root() payload: FlairAssignmentPayload
   ): Promise<FlairIdCardIdTeamIdPayload> {
     return payload

@@ -2,6 +2,7 @@ import {
   Arg,
   Authorized,
   Ctx,
+  ID,
   Int,
   Mutation,
   Publisher,
@@ -49,7 +50,7 @@ export default class CardResolver {
   async createCard(
     @Arg("name") name: string,
     @Arg("description", { nullable: true }) description: string,
-    @Arg("listId") listId: string,
+    @Arg("listId", () => ID) listId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_CREATED) publish: Publisher<CardCreatedPayload>
   ): Promise<CreateCardResponse> {
@@ -85,15 +86,18 @@ export default class CardResolver {
     topics: Notification.CARD_CREATED,
     filter: boardIdFilter,
   })
-  async cardCreated(@Arg("boardId") boardId: string, @Root() payload: CardCreatedPayload) {
+  async cardCreated(
+    @Arg("boardId", () => ID) boardId: string,
+    @Root() payload: CardCreatedPayload
+  ) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async moveCard(
-    @Arg("cardId") cardId: string,
-    @Arg("listId", { nullable: true }) listId: string,
+    @Arg("cardId", () => ID) cardId: string,
+    @Arg("listId", () => ID, { nullable: true }) listId: string,
     @Arg("destinationIndex", () => Int) destinationIndex: number,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_MOVED) publish: Publisher<CardMovedPayload>
@@ -161,20 +165,20 @@ export default class CardResolver {
       return context.userId !== payload.userId
     }),
   })
-  async cardMoved(@Arg("boardId") boardId: string, @Root() payload: CardMovedPayload) {
+  async cardMoved(@Arg("boardId", () => ID) boardId: string, @Root() payload: CardMovedPayload) {
     return payload
   }
 
   @Authorized()
   @Query(() => Int)
-  async nextIndex(@Arg("listId") listId: string, @Ctx() ctx: Context) {
+  async nextIndex(@Arg("listId", () => ID) listId: string, @Ctx() ctx: Context) {
     return this.cardService.nextIndex(ctx.userId, listId)
   }
 
   @Authorized()
   @Mutation(() => RenameResponse)
   async renameCard(
-    @Arg("cardId") cardId: string,
+    @Arg("cardId", () => ID) cardId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_UPDATED) publish: Publisher<CardUpdatedPayload>
@@ -207,7 +211,7 @@ export default class CardResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async updateCardDescription(
-    @Arg("cardId") cardId: string,
+    @Arg("cardId", () => ID) cardId: string,
     @Arg("description") description: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_UPDATED) publish: Publisher<CardUpdatedPayload>
@@ -240,7 +244,7 @@ export default class CardResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async deleteCard(
-    @Arg("id") id: string,
+    @Arg("id", () => ID) id: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_DELETED) publish: Publisher<CardIdBoardIdPayload>
   ) {
@@ -268,8 +272,8 @@ export default class CardResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async assignUser(
-    @Arg("cardId") cardId: string,
-    @Arg("userId") userId: string,
+    @Arg("cardId", () => ID) cardId: string,
+    @Arg("userId", () => ID) userId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_USER_ASSIGNED) publish: Publisher<CardUserAssignedPayload>
   ) {
@@ -308,7 +312,7 @@ export default class CardResolver {
     filter: boardIdFilter,
   })
   async cardUserAssigned(
-    @Arg("boardId") boardId: string,
+    @Arg("boardId", () => ID) boardId: string,
     @Root() payload: CardUserAssignedPayload
   ) {
     return payload
@@ -317,7 +321,7 @@ export default class CardResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async unassignUser(
-    @Arg("cardId") cardId: string,
+    @Arg("cardId", () => ID) cardId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.CARD_USER_UNASSIGNED) publish: Publisher<CardIdBoardIdPayload>
   ) {

@@ -3,6 +3,7 @@ import {
   Authorized,
   Ctx,
   FieldResolver,
+  ID,
   Mutation,
   Publisher,
   PubSub,
@@ -48,7 +49,7 @@ export default class BoardResolver {
   @Authorized()
   @Mutation(() => CreateBoardResponse)
   async createBoard(
-    @Arg("teamId") teamId: string,
+    @Arg("teamId", () => ID) teamId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.BOARD_CREATED) publish: Publisher<BoardCreatedPayload>
@@ -82,7 +83,7 @@ export default class BoardResolver {
   @Authorized()
   @Mutation(() => RenameResponse)
   async renameBoard(
-    @Arg("boardId") boardId: string,
+    @Arg("boardId", () => ID) boardId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.BOARD_RENAMED) publish: Publisher<Board>
@@ -125,7 +126,7 @@ export default class BoardResolver {
   @Authorized()
   @Mutation(() => Boolean)
   async deleteBoard(
-    @Arg("id") id: string,
+    @Arg("id", () => ID) id: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.BOARD_DELETED) publish: Publisher<BoardDeletedPayload>
   ) {
@@ -147,7 +148,7 @@ export default class BoardResolver {
       (!!args.boardId ? args.boardId === payload.boardId : true),
   })
   async boardDeleted(
-    @Arg("boardId", { nullable: true }) boardId: string,
+    @Arg("boardId", () => ID, { nullable: true }) boardId: string,
     @Root() payload: BoardDeletedPayload
   ) {
     return payload.boardId

@@ -16,7 +16,7 @@ export default class UserResolver {
 
   @Authorized(Role.APP_ADMIN)
   @Query(() => User)
-  async user(@Arg("id") id: string) {
+  async user(@Arg("id", () => ID) id: string) {
     return this.userService.findById(id)
   }
 

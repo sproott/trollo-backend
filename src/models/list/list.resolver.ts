@@ -2,6 +2,7 @@ import {
   Arg,
   Authorized,
   Ctx,
+  ID,
   Int,
   Mutation,
   Publisher,
@@ -35,7 +36,7 @@ export default class ListResolver {
   @Mutation(() => CreateListResponse)
   async createList(
     @Arg("name") name: string,
-    @Arg("boardId") boardId: string,
+    @Arg("boardId", () => ID) boardId: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.LIST_CREATED) publish: Publisher<List>
   ): Promise<CreateListResponse> {
@@ -67,14 +68,14 @@ export default class ListResolver {
     topics: Notification.LIST_CREATED,
     filter: boardIdFilter,
   })
-  async listCreated(@Arg("boardId") boardId: string, @Root() payload: List) {
+  async listCreated(@Arg("boardId", () => ID) boardId: string, @Root() payload: List) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async moveList(
-    @Arg("listId") listId: string,
+    @Arg("listId", () => ID) listId: string,
     @Arg("destinationIndex", () => Int) destinationIndex: number,
     @Ctx() ctx: Context,
     @PubSub(Notification.LIST_MOVED) publish: Publisher<ListMovedPayload>
@@ -123,14 +124,14 @@ export default class ListResolver {
       }
     ),
   })
-  async listMoved(@Arg("boardId") boardId: string, @Root() payload: ListMovedPayload) {
+  async listMoved(@Arg("boardId", () => ID) boardId: string, @Root() payload: ListMovedPayload) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => RenameResponse)
   async renameList(
-    @Arg("listId") listId: string,
+    @Arg("listId", () => ID) listId: string,
     @Arg("name") name: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.LIST_RENAMED) publish: Publisher<List>
@@ -161,14 +162,14 @@ export default class ListResolver {
     topics: Notification.LIST_RENAMED,
     filter: boardIdFilter,
   })
-  async listRenamed(@Arg("boardId") boardId: string, @Root() payload: List) {
+  async listRenamed(@Arg("boardId", () => ID) boardId: string, @Root() payload: List) {
     return payload
   }
 
   @Authorized()
   @Mutation(() => Boolean)
   async deleteList(
-    @Arg("id") id: string,
+    @Arg("id", () => ID) id: string,
     @Ctx() ctx: Context,
     @PubSub(Notification.LIST_DELETED) publish: Publisher<ListDeletedPayload>
   ) {
@@ -191,7 +192,10 @@ export default class ListResolver {
       return { board_id: payload.boardId }
     }, boardIdFilter),
   })
-  async listDeleted(@Arg("boardId") boardId: string, @Root() payload: ListDeletedPayload) {
+  async listDeleted(
+    @Arg("boardId", () => ID) boardId: string,
+    @Root() payload: ListDeletedPayload
+  ) {
     return payload.listId
   }
 }

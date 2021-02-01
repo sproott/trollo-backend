@@ -32,7 +32,7 @@ export const AutoLoader = (params?: {
 }) => {
   const model = <typeof Model>Object.getPrototypeOf(root).constructor
   // @ts-ignore
-  const field = model.relationMappings[params?.relationName || info.fieldName]
+  const field = model.relationMappings[params?.relationName ?? info.fieldName]
   if (!field) {
     throw new Error(
       `Error: Relation "${info.fieldName}" missing in relation mappings of class "${root.constructor.name}"`
@@ -43,7 +43,7 @@ export const AutoLoader = (params?: {
     loader = context.loaderContainer.getLoader({
       ...mappings[field.relation.name],
       fieldName: info.fieldName,
-      relationName: params?.relationName || info.fieldName,
+      relationName: params?.relationName ?? info.fieldName,
       model,
     })
   } else {

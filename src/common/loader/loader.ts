@@ -1,6 +1,7 @@
 import Objection, { Model, Relation } from "objection"
-import DataLoader from "dataloader"
 import { groupBy, map } from "ramda"
+
+import DataLoader from "dataloader"
 
 export enum LoaderType {
   BelongsToOne,
@@ -23,7 +24,7 @@ const col = (prop: Objection.RelationProperty) => {
 }
 
 const mapKeysToModels = (keys: string[], models: { [key: string]: Model[] }) => {
-  return map((key) => models[key] || [], keys)
+  return map((key) => models[key] ?? [], keys)
 }
 
 export default class Loader {
@@ -43,7 +44,7 @@ export default class Loader {
       // @ts-ignore
       modelMap[m[this.relatedColumnName]] = m
     })
-    return map((key) => modelMap[key] || undefined, keys)
+    return map((key) => modelMap[key] ?? undefined, keys)
   };
 
   [LoaderType.HasMany] = async (keys: string[]) => {

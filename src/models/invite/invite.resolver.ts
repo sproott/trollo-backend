@@ -13,9 +13,9 @@ import Team from "../team/team.model"
 
 dayjs.extend(duration)
 
-type FOREVER = "forever"
+type NEVER = "never"
 
-type InviteInterval = duration.Duration | FOREVER
+type InviteInterval = duration.Duration | NEVER
 
 const timeIntervals: { [key: string]: InviteInterval } = {
   "30 minutes": dayjs.duration(30, "minutes"),
@@ -24,7 +24,7 @@ const timeIntervals: { [key: string]: InviteInterval } = {
   "12 hours": dayjs.duration(12, "hour"),
   "1 day": dayjs.duration(1, "day"),
   "7 days": dayjs.duration(7, "day"),
-  forever: "forever",
+  never: "never",
 }
 
 const secret = process.env.JWT_SECRET ?? "=e4r<4E];aTQxB3p"
@@ -53,7 +53,7 @@ export default class InviteResolver {
     if (!team) throw new Error("Own team with this ID does not exist")
 
     const expirationDate =
-      expiration === "forever"
+      expiration === "never"
         ? undefined
         : dayjs()
             .add(timeIntervals[expiration] as duration.Duration)

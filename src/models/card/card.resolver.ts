@@ -34,7 +34,7 @@ import Notification from "../../common/types/notification"
 import { boardIdFilter } from "../board/board.filter"
 import UserService from "../user/user.service"
 import { BoardIdArgs } from "../../common/types/argTypes"
-import { and, FilterFuncData } from "../../common/lib/filterFunc"
+import { and, FilterFuncData, transform } from "../../common/lib/filterFunc"
 
 @Resolver(Card)
 export default class CardResolver {
@@ -84,7 +84,7 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => CardCreatedPayload, {
     topics: Notification.CARD_CREATED,
-    filter: boardIdFilter,
+    filter: transform((p: CardCreatedPayload) => p.boardId, boardIdFilter),
   })
   async cardCreated(
     @Arg("boardId", () => ID) boardId: string,
@@ -161,9 +161,12 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => CardMovedPayload, {
     topics: Notification.CARD_MOVED,
-    filter: and(boardIdFilter, ({ context, payload }: FilterFuncData<CardMovedPayload>) => {
-      return context.userId !== payload.userId
-    }),
+    filter: and<CardMovedPayload, BoardIdArgs>(
+      transform((p) => p.boardId, boardIdFilter),
+      ({ context, payload }) => {
+        return context.userId !== payload.userId
+      }
+    ),
   })
   async cardMoved(@Arg("boardId", () => ID) boardId: string, @Root() payload: CardMovedPayload) {
     return payload
@@ -224,9 +227,9 @@ export default class CardResolver {
         .returning("card.*")
     )[0]
     if (!!affectedCard) {
-      const boardId = ((
-        await Card.query().for(cardId).joinRelated("list").select("list.board_id")
-      )[0] as unknown) as string
+      const boardId = (
+        await List.query().joinRelated("cards").where("cards.id", cardId).select("list.board_id")
+      )[0].board_id
       await publish({ card: affectedCard, boardId })
       return true
     }
@@ -235,7 +238,7 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => Card, {
     topics: Notification.CARD_UPDATED,
-    filter: boardIdFilter,
+    filter: transform((payload: CardUpdatedPayload) => payload.boardId, boardIdFilter),
   })
   async cardUpdated(
     @Arg("boardId", () => ID) boardId: string,
@@ -266,7 +269,7 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => CardIdBoardIdPayload, {
     topics: Notification.CARD_DELETED,
-    filter: boardIdFilter,
+    filter: transform((p: CardIdBoardIdPayload) => p.boardId, boardIdFilter),
   })
   async cardDeleted(
     @Arg("boardId", () => ID) boardId: string,
@@ -315,7 +318,7 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => CardUserAssignedPayload, {
     topics: Notification.CARD_USER_ASSIGNED,
-    filter: boardIdFilter,
+    filter: transform((p: CardUserAssignedPayload) => p.boardId, boardIdFilter),
   })
   async cardUserAssigned(
     @Arg("boardId", () => ID) boardId: string,
@@ -352,7 +355,7 @@ export default class CardResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => CardIdBoardIdPayload, {
     topics: Notification.CARD_USER_UNASSIGNED,
-    filter: boardIdFilter,
+    filter: transform((p: CardIdBoardIdPayload) => p.boardId, boardIdFilter),
   })
   async cardUserUnassigned(
     @Arg("boardId", () => ID) boardId: string,

@@ -66,7 +66,7 @@ export default class ListResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => List, {
     topics: Notification.LIST_CREATED,
-    filter: boardIdFilter,
+    filter: transform((p: List) => p.board_id, boardIdFilter),
   })
   async listCreated(@Arg("boardId", () => ID) boardId: string, @Root() payload: List) {
     return payload
@@ -118,7 +118,7 @@ export default class ListResolver {
   @Subscription(() => ListMovedPayload, {
     topics: Notification.LIST_MOVED,
     filter: and<ListMovedPayload>(
-      transform((payload) => payload.list, boardIdFilter),
+      transform((payload) => payload.list.board_id, boardIdFilter),
       ({ context, payload }) => {
         return context.userId !== payload.userId
       }
@@ -160,7 +160,7 @@ export default class ListResolver {
   @Authorized([Role.BOARD])
   @Subscription(() => List, {
     topics: Notification.LIST_RENAMED,
-    filter: boardIdFilter,
+    filter: transform((p: List) => p.board_id, boardIdFilter),
   })
   async listRenamed(@Arg("boardId", () => ID) boardId: string, @Root() payload: List) {
     return payload
@@ -189,7 +189,7 @@ export default class ListResolver {
   @Subscription(() => String, {
     topics: Notification.LIST_DELETED,
     filter: transform((payload: ListDeletedPayload) => {
-      return { board_id: payload.boardId }
+      return payload.boardId
     }, boardIdFilter),
   })
   async listDeleted(

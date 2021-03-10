@@ -1,8 +1,9 @@
+import { Field, ObjectType, UseMiddleware } from "type-graphql"
 import { Model, RelationMappings } from "objection"
+
+import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 import Team from "../team/team.model"
 import User from "../user/user.model"
-import { Field, ObjectType, UseMiddleware } from "type-graphql"
-import { AutoLoader } from "../../common/loader/autoloaderMiddleware"
 
 @ObjectType()
 export class Participant extends Model {
@@ -24,6 +25,7 @@ export class Participant extends Model {
   team: Team
   team_id: string
 
+  @Field(() => Boolean)
   owner: boolean
 
   static get relationMappings(): RelationMappings {

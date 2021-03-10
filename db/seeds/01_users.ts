@@ -1,4 +1,5 @@
 import * as Knex from "knex"
+
 import { hash } from "../../src/common/lib/crypt"
 
 export async function seed(knex: Knex): Promise<void> {
@@ -30,7 +31,7 @@ export async function seed(knex: Knex): Promise<void> {
       username: "AppAdmin",
       email: "admin@trollo.com",
       is_admin: true,
-      password: await hash("omegalul"),
+      password: await hash("admin123"),
     },
   ])
 }

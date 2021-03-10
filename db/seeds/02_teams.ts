@@ -5,19 +5,19 @@ export async function seed(knex: Knex): Promise<void> {
   await knex("team").insert([
     {
       id: "92b81a02-cc11-418f-9bf9-313c092b1df3",
-      name: "Team of the Bruhs",
+      name: "Testing team 1",
     },
     {
       id: "ac671fd3-ebbb-4db5-98d2-861113110802",
-      name: "Team of the New Era",
+      name: "Testing team 2",
     },
     {
       id: "75011cb8-6da4-49ce-ac1d-e8e38a245b5b",
-      name: "Admin team 1",
+      name: "Trollo Developers",
     },
     {
       id: "68cce4ac-1a40-44a3-9d9a-865a34e64b6c",
-      name: "Admin team 2",
+      name: "Startup Ideas",
     },
   ])
 

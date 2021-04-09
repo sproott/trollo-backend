@@ -1,13 +1,12 @@
-import { Strategy as PassportStrategy } from "passport-strategy"
-import { Inject } from "typescript-ioc"
-import UserService from "../models/user/user.service"
-import PassportStrategyType from "./enum/PassportStrategyType"
-import express from "express"
-import { LoginInput } from "../models/user/user.input"
-import User from "../models/user/user.model"
-import S from "string"
 import { Done } from "../init/buildContext"
+import { Inject } from "typescript-ioc"
+import { LoginInput } from "../models/user/user.input"
+import { Strategy as PassportStrategy } from "passport-strategy"
+import PassportStrategyType from "./enum/PassportStrategyType"
+import User from "../models/user/user.model"
+import UserService from "../models/user/user.service"
 import { compare } from "../common/lib/crypt"
+import express from "express"
 
 export default class GraphqlCredentialsStrategy extends PassportStrategy {
   @Inject
@@ -20,10 +19,10 @@ export default class GraphqlCredentialsStrategy extends PassportStrategy {
     this.name = PassportStrategyType.CREDENTIALS_STRATEGY
   }
 
-  async verify(req: express.Request, input: LoginInput, done: Done): Promise<void> {
+  async verify(_: express.Request, input: LoginInput, done: Done): Promise<void> {
     let { usernameOrEmail, password } = input
     let user: User
-    if (S(usernameOrEmail).contains("@")) {
+    if (usernameOrEmail.includes("@")) {
       user = await this.userService.findByEmail(usernameOrEmail)
     } else {
       user = await this.userService.findByUsername(usernameOrEmail)

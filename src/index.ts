@@ -26,7 +26,7 @@ async function init() {
 
   if (isProduction()) {
     await knex.migrate.latest()
-    await knex.seed.run()
+    // await knex.seed.run()
   }
 
   const store = new KnexSessionStore({
